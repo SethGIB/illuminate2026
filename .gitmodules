@@ -16,3 +16,9 @@
 [submodule "living-color/Prod/lib/pimoroni-pico-rp2350"]
 	path = living-color/Prod/lib/pimoroni-pico-rp2350
 	url = https://github.com/pimoroni/pimoroni-pico-rp2350.git
+[submodule "living-color/Prod/ref/Plasma-2350W-Web-Server"]
+	path = living-color/Prod/ref/Plasma-2350W-Web-Server
+	url = https://github.com/gturnr/Plasma-2350W-Web-Server.git
+[submodule "living-color/Prod/ref/plasma_2350_fx77"]
+	path = living-color/Prod/ref/plasma_2350_fx77
+	url = https://github.com/mrglennjones/plasma_2350_fx77.git
