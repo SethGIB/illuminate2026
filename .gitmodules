@@ -1,0 +1,18 @@
+[submodule "living-color/Prod/lib/pico-boilerplate"]
+	path = living-color/Prod/lib/pico-boilerplate
+	url = https://github.com/pimoroni/pico-boilerplate.git
+[submodule "living-color/Prod/lib/picosystem"]
+	path = living-color/Prod/lib/picosystem
+	url = https://github.com/pimoroni/picosystem.git
+[submodule "living-color/Prod/lib/pimoroni-pico-stubs"]
+	path = living-color/Prod/lib/pimoroni-pico-stubs
+	url = https://github.com/pimoroni/pimoroni-pico-stubs.git
+[submodule "living-color/Prod/lib/picosystem-boilerplate"]
+	path = living-color/Prod/lib/picosystem-boilerplate
+	url = https://github.com/pimoroni/picosystem-boilerplate.git
+[submodule "living-color/Prod/lib/plasma"]
+	path = living-color/Prod/lib/plasma
+	url = https://github.com/pimoroni/plasma.git
+[submodule "living-color/Prod/lib/pimoroni-pico-rp2350"]
+	path = living-color/Prod/lib/pimoroni-pico-rp2350
+	url = https://github.com/pimoroni/pimoroni-pico-rp2350.git
