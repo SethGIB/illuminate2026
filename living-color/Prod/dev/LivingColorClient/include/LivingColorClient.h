@@ -3,6 +3,7 @@
 #include "cinder/app/RendererGl.h"
 #include "cinder/gl/gl.h"
 #include "CinderOpenCV.h"
+#include "cinder/Serial.h"
 
 using namespace ci;
 using namespace ci::app;
@@ -32,6 +33,7 @@ public:
 	void draw() override;
 
 private:
+	void setupCom(const string &name);
 	void setupLEDs();
 	void drawLEDs();
 
@@ -42,5 +44,6 @@ private:
 	Rectf mTestBounds;
 	vector<cv::Point> mTestPoints;
 
-	gl::FboRef mCvMatFbo;
+	bool mUseSerial = false;
+	SerialRef mCom;
 };

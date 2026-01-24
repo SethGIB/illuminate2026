@@ -3,6 +3,7 @@
 const int kGridX = 5;
 const int kGridY = 6;
 const int kPad = 80;
+const int kBound = 80;
 
 LCLed::LCLed() : mPos(vec2()), mId(-1) {}
 
@@ -47,10 +48,10 @@ void LivingColorClientApp::update()
 	mTestPoints.clear();
 	mMousePos = getWindow()->getMousePos();
 	
-	mTestBounds.x1 = mMousePos.x - 80;
-	mTestBounds.y1 = mMousePos.y - 80;
-	mTestBounds.x2 = mMousePos.x + 80;
-	mTestBounds.y2 = mMousePos.y + 80;
+	mTestBounds.x1 = mMousePos.x - kBound;
+	mTestBounds.y1 = mMousePos.y - kBound;
+	mTestBounds.x2 = mMousePos.x + kBound;
+	mTestBounds.y2 = mMousePos.y + kBound;
 
 	mTestPoints.push_back(cv::Point(mTestBounds.x1, mTestBounds.y1));
 	mTestPoints.push_back(cv::Point(mTestBounds.x2, mTestBounds.y1));
@@ -68,6 +69,25 @@ void LivingColorClientApp::update()
 			mSelected.push_back(l.getId());
 		}
 	}
+
+	if (mSelected.size() > 0)
+	{
+		string comMsg = to_string(mSelected[0]);
+		for (int s=1;s<mSelected.size();s++)
+		{
+			comMsg += ",";
+			comMsg += to_string(mSelected[s]);
+		}
+		comMsg += "\n"; //termination
+
+		if (mUseSerial)
+		{
+			mCom->writeString(comMsg);
+			mCom->flush();
+		}
+
+		console() << comMsg;
+	}
 }
 
 void LivingColorClientApp::draw()
@@ -77,12 +97,25 @@ void LivingColorClientApp::draw()
 	gl::color(Color::white());
 	drawLEDs();
 
-
 	gl::enableAlphaBlending();
 	gl::color(ColorA(vec4(0.0f, 1.0f, 0.0f, 0.5f)));
 	gl::drawSolidRect(mTestBounds);
 	gl::disableAlphaBlending();
 	
+}
+
+void LivingColorClientApp::setupCom(const string& name)
+{
+	try
+	{
+		auto com = Serial::findDeviceByNameContains(name);
+		mCom = Serial::create(com, 115200);
+		mUseSerial = true;
+	}
+	catch (SerialExc& e)
+	{
+		mUseSerial = false;
+	}
 }
 
 void LivingColorClientApp::setupLEDs()
@@ -97,10 +130,9 @@ void LivingColorClientApp::setupLEDs()
 		{
 			float x0 = lmap<float>(x + 0.5f, 0, kGridX, kPad, w);
 			mLeds.push_back(LCLed(x0, y0, count));
-			count++;
+			count+=1;
 		}
 	}
-
 }
 
 void LivingColorClientApp::drawLEDs()
@@ -116,6 +148,7 @@ void LivingColorClientApp::drawLEDs()
 void prepareSettings(App::Settings* settings)
 {
 	settings->setWindowSize(500, 600);
+	settings->setConsoleWindowEnabled(true);
 }
 
 CINDER_APP( LivingColorClientApp, RendererGl, *prepareSettings )
