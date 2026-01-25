@@ -4,6 +4,7 @@ const int kGridX = 5;
 const int kGridY = 6;
 const int kPad = 80;
 const int kBound = 80;
+const string kPortName = "COM7";
 
 LCLed::LCLed() : mPos(vec2()), mId(-1) {}
 
@@ -35,6 +36,7 @@ vec2 LCLed::getPos() const
 
 void LivingColorClientApp::setup()
 {
+	setupCom(kPortName);
 	setupLEDs();
 }
 
@@ -108,7 +110,8 @@ void LivingColorClientApp::setupCom(const string& name)
 {
 	try
 	{
-		auto com = Serial::findDeviceByNameContains(name);
+		//auto com = Serial::findDeviceByNameContains(name);
+		auto com = Serial::Device(name); //findDevice* and getDevice don't enumerate properly on some systems
 		mCom = Serial::create(com, 115200);
 		mUseSerial = true;
 	}
@@ -128,7 +131,15 @@ void LivingColorClientApp::setupLEDs()
 		float y0 = lmap<float>(y + 0.5f, 0, kGridY, kPad, h);
 		for (int x = 0; x < kGridX; x++)
 		{
-			float x0 = lmap<float>(x + 0.5f, 0, kGridX, kPad, w);
+			float x0 = -1;
+			if (y % 2 == 0)
+			{
+				x0 = lmap<float>(x + 0.5f, 0, kGridX, kPad, w);
+			}
+			else
+			{
+				x0 = lmap<float>(kGridX - (x + 0.5f), 0, kGridX, kPad, w);
+			}
 			mLeds.push_back(LCLed(x0, y0, count));
 			count+=1;
 		}
