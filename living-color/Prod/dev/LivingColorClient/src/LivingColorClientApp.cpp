@@ -1,9 +1,12 @@
 #include "LivingColorClient.h"
 
-const int kGridX = 5;
-const int kGridY = 6;
-const int kPad = 80;
-const int kBound = 80;
+const int kWindowWidth = 500;
+const int kWindowHeight = 800;
+const int kGridX = 10;
+const int kGridY = 16;
+const int kPad = 60;
+const int kRadius = 100;
+
 const string kPortName = "COM7";
 
 LCLed::LCLed() : mPos(vec2()), mId(-1) {}
@@ -36,8 +39,15 @@ vec2 LCLed::getPos() const
 
 void LivingColorClientApp::setup()
 {
-	setupCom(kPortName);
+	//setupCom(kPortName);
 	setupLEDs();
+
+	gl::Fbo::Format fboFormat;
+	fboFormat.setColorTextureFormat(gl::Texture2d::Format().internalFormat(GL_RGBA8));
+	mFbo = gl::Fbo::create(getWindowWidth(), getWindowHeight(), fboFormat);
+
+	mContourMat = cv::Mat::zeros(getWindowHeight(), getWindowWidth(), CV_8UC4);	
+	mOutContoursMat = cv::Mat::zeros(getWindowHeight(), getWindowWidth(), CV_8UC4);
 }
 
 void LivingColorClientApp::mouseDown( MouseEvent event )
@@ -50,67 +60,30 @@ void LivingColorClientApp::update()
 	mTestPoints.clear();
 	mMousePos = getWindow()->getMousePos();
 	
-	mTestBounds.x1 = mMousePos.x - kBound;
-	mTestBounds.y1 = mMousePos.y - kBound;
-	mTestBounds.x2 = mMousePos.x + kBound;
-	mTestBounds.y2 = mMousePos.y + kBound;
-
-	mTestPoints.push_back(cv::Point(mTestBounds.x1, mTestBounds.y1));
-	mTestPoints.push_back(cv::Point(mTestBounds.x2, mTestBounds.y1));
-	mTestPoints.push_back(cv::Point(mTestBounds.x2, mTestBounds.y2));
-	mTestPoints.push_back(cv::Point(mTestBounds.x1, mTestBounds.y2));
-
-	//Now test points
-	for (auto& l : mLeds)
-	{
-		auto p = l.getPos();
-		cv::Point testPt(p.x, p.y);
-		auto testRes = cv::pointPolygonTest(cv::Mat(mTestPoints), testPt, false);
-		if (testRes > 0)
-		{
-			mSelected.push_back(l.getId());
-		}
-	}
-
-	if (mSelected.size() > 0)
-	{
-		string comMsg = to_string(mSelected[0]);
-		for (int s=1;s<mSelected.size();s++)
-		{
-			comMsg += ",";
-			comMsg += to_string(mSelected[s]);
-		}
-		comMsg += "\n"; //termination
-
-		if (mUseSerial)
-		{
-			mCom->writeString(comMsg);
-			mCom->flush();
-		}
-
-		console() << comMsg;
-	}
+	updateImageBuffers();
+	updateLeds();
 }
 
 void LivingColorClientApp::draw()
 {
+	gl::enableDepth(false);
 	gl::clear( Color( 0, 0, 0 ) ); 
 	gl::setMatricesWindow(getWindowSize());
 	gl::color(Color::white());
 	drawLEDs();
 
 	gl::enableAlphaBlending();
-	gl::color(ColorA(vec4(0.0f, 1.0f, 0.0f, 0.5f)));
-	gl::drawSolidRect(mTestBounds);
-	gl::disableAlphaBlending();
+	gl::draw(mFbo->getColorTexture());
 	
+	auto txContours = gl::Texture2d::create(fromOcv(mOutContoursMat));
+	gl::draw(txContours);
+	gl::disableAlphaBlending();
 }
 
 void LivingColorClientApp::setupCom(const string& name)
 {
 	try
 	{
-		//auto com = Serial::findDeviceByNameContains(name);
 		auto com = Serial::Device(name); //findDevice* and getDevice don't enumerate properly on some systems
 		mCom = Serial::create(com, 115200);
 		mUseSerial = true;
@@ -118,6 +91,8 @@ void LivingColorClientApp::setupCom(const string& name)
 	catch (SerialExc& e)
 	{
 		mUseSerial = false;
+		console() << "Serial Coms error: " << e.what() << std::endl;
+		console() << "Starting in visualization only mode." << std::endl;
 	}
 }
 
@@ -146,6 +121,67 @@ void LivingColorClientApp::setupLEDs()
 	}
 }
 
+void LivingColorClientApp::updateImageBuffers()
+{
+	mFbo->bindFramebuffer();
+	gl::clear(ColorA(0, 0, 0, 0));
+	gl::color(ColorA(vec4(0.0f, 1.0f, 0.0f, 0.5f)));
+	gl::drawSolidCircle(mMousePos, kRadius);
+	mFbo->unbindFramebuffer();
+
+	auto imgSrc = mFbo->getColorTexture()->createSource();
+
+	cv::Mat tmpMat = toOcv(imgSrc);
+	mOutContoursMat.setTo(cv::Scalar(0, 0, 0, 0));
+	cv::cvtColor(tmpMat, mContourMat, cv::COLOR_RGBA2GRAY);
+	cv::findContours(mContourMat, mContours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
+	cv::drawContours(mOutContoursMat, mContours, -1, cv::Scalar(0, 255, 255, 255), 1);
+}
+
+void LivingColorClientApp::updateLeds()
+{
+	if(mContourMat.empty() || mContours.size() == 0)
+		return;
+
+	for (const auto& bound : mContours)
+	{
+		for (auto& l : mLeds)
+		{
+			auto p = l.getPos();
+			cv::Point testPt(p.x, p.y);
+			auto testRes = cv::pointPolygonTest(bound, testPt, false);
+			if (testRes >= 0)
+			{
+				mSelected.push_back(l.getId());
+			}
+		}
+	}
+
+	if (mSelected.size() > 0)
+	{
+		// remove uniques
+		sort(mSelected.begin(), mSelected.end());
+		auto mIt = unique(mSelected.begin(), mSelected.end());
+		mSelected.erase(mIt, mSelected.end());
+
+		string comMsg = to_string(mSelected[0]);
+		for (int s = 1; s < mSelected.size(); s++)
+		{
+			comMsg += ",";
+			comMsg += to_string(mSelected[s]);
+		}
+		comMsg += "\n"; //termination
+
+		if (mUseSerial)
+		{
+			mCom->writeString(comMsg);
+			mCom->flush();
+		}
+
+		console() << comMsg;
+	}
+}
+
 void LivingColorClientApp::drawLEDs()
 {
 	for (auto& l : mLeds)
@@ -158,8 +194,8 @@ void LivingColorClientApp::drawLEDs()
 
 void prepareSettings(App::Settings* settings)
 {
-	settings->setWindowSize(500, 600);
-	settings->setConsoleWindowEnabled(true);
+	settings->setWindowSize(kWindowWidth, kWindowHeight);
+	//settings->setConsoleWindowEnabled(true);
 }
 
 CINDER_APP( LivingColorClientApp, RendererGl, *prepareSettings )

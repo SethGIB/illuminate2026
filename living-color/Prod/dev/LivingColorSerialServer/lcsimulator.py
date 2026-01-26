@@ -31,7 +31,7 @@ if __name__ == "__main__":
     pygame.init()
     
     WIN_W = 500
-    WIN_H = 600
+    WIN_H = 800
     WINDOW = pygame.display.set_mode((WIN_W, WIN_H))
     CANVAS = pygame.Surface(WINDOW.get_size())
     CANVAS = CANVAS.convert()
@@ -41,8 +41,8 @@ if __name__ == "__main__":
     FPS = 30
     RUN_LOOP = True
 
-    NUM_RECTS_X = 5
-    NUM_RECTS_Y = 6
+    NUM_RECTS_X = 10
+    NUM_RECTS_Y = 16
     rect_w = WIN_W/NUM_RECTS_X
     rect_h = WIN_H/NUM_RECTS_Y
     led_list = []

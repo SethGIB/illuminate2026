@@ -35,6 +35,10 @@ public:
 private:
 	void setupCom(const string &name);
 	void setupLEDs();
+
+	void updateImageBuffers();
+	void updateLeds();
+
 	void drawLEDs();
 
 	vector<LCLed> mLeds;
@@ -46,4 +50,11 @@ private:
 
 	bool mUseSerial = false;
 	SerialRef mCom;
+
+	gl::FboRef mFbo;
+	
+	cv::Mat mContourMat;
+	cv::Mat mOutContoursMat;
+
+	vector<vector<cv::Point>> mContours;
 };
