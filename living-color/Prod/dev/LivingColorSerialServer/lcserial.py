@@ -23,7 +23,7 @@ def setup_com(port_name, bps):
         return serial.Serial( port=port_name, baudrate=bps, timeout=TIME_OUT, write_timeout=TIME_OUT)
     except serial.SerialException as srl_ex:
         print("Got Serial Exception:")        
-        if len(srl_ex.args==3):
+        if len(srl_ex.args)==3:
             err, msg, info = srl_ex.args
 
             print(f"{err}: {msg}, {info}")
@@ -82,4 +82,5 @@ if __name__ == "__main__":
         MAIN_WINDOW.fill("black")
         RUN_LOOP = run_loop(FPS, SERIAL_COM, TICK)
 
-    SERIAL_COM.close()
+    if SERIAL_COM:
+        SERIAL_COM.close()

@@ -39,7 +39,7 @@ vec2 LCLed::getPos() const
 
 void LivingColorClientApp::setup()
 {
-	//setupCom(kPortName);
+	setupCom(kPortName);
 	setupLEDs();
 
 	gl::Fbo::Format fboFormat;
