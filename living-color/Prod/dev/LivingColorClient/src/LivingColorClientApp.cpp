@@ -4,42 +4,22 @@ const int kWindowWidth = 500;
 const int kWindowHeight = 800;
 const int kGridX = 10;
 const int kGridY = 16;
-const int kPad = 60;
-const int kRadius = 100;
+const int kPad = 30;
+const int kRadius = 80;
+const int kLedRadius = (kWindowWidth - 2 * kPad) / (kGridX * 3);
 
 const string kPortName = "COM7";
 
-LCLed::LCLed() : mPos(vec2()), mId(-1) {}
-
-LCLed::LCLed(vec2 _pos, int _id) : mPos(_pos), mId(_id) {}
-
-LCLed::LCLed(float _x, float _y, int _id) : mPos(vec2(_x, _y)), mId(_id) {}
-
 void LCLed::show(bool isInside)
 {
-	if (isInside)
-	{
-		gl::drawSolidCircle(mPos, 8);
-	}
-	else
-	{
-		gl::drawStrokedCircle(mPos, 4);
-	}
-}
-
-int LCLed::getId() const
-{
-	return mId;
-}
-
-vec2 LCLed::getPos() const
-{
-	return mPos;
+	auto col = isInside ? mColor : mColor * 0.33;
+	gl::color(col);
+	gl::drawSolidCircle(mPos, kLedRadius);
 }
 
 void LivingColorClientApp::setup()
 {
-	setupCom(kPortName);
+	//setupCom(kPortName);
 	setupLEDs();
 
 	gl::Fbo::Format fboFormat;
@@ -73,7 +53,7 @@ void LivingColorClientApp::draw()
 	drawLEDs();
 
 	gl::enableAlphaBlending();
-	gl::draw(mFbo->getColorTexture());
+	//gl::draw(mFbo->getColorTexture());
 	
 	auto txContours = gl::Texture2d::create(fromOcv(mOutContoursMat));
 	gl::draw(txContours);
@@ -115,7 +95,9 @@ void LivingColorClientApp::setupLEDs()
 			{
 				x0 = lmap<float>(kGridX - (x + 0.5f), 0, kGridX, kPad, w);
 			}
-			mLeds.push_back(LCLed(x0, y0, count));
+
+			auto ledColor = Colorf(ColorModel::CM_HSV, lmap<float>(count, 0, kGridX * kGridY, 0.0f, 1.0f), 1.0f, 1.0f);
+			mLeds.push_back(LCLed(x0, y0, ledColor, count));
 			count+=1;
 		}
 	}
@@ -152,7 +134,7 @@ void LivingColorClientApp::updateLeds()
 			auto testRes = cv::pointPolygonTest(bound, testPt, false);
 			if (testRes >= 0)
 			{
-				mSelected.push_back(l.getId());
+				mSelected.push_back(l);
 			}
 		}
 	}
