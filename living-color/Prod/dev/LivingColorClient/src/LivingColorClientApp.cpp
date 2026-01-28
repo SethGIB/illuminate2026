@@ -10,13 +10,6 @@ const int kLedRadius = (kWindowWidth - 2 * kPad) / (kGridX * 3);
 
 const string kPortName = "COM7";
 
-void LCLed::show(bool isInside)
-{
-	auto col = isInside ? mColor : mColor * 0.33;
-	gl::color(col);
-	gl::drawSolidCircle(mPos, kLedRadius);
-}
-
 void LivingColorClientApp::setup()
 {
 	//setupCom(kPortName);
@@ -141,25 +134,21 @@ void LivingColorClientApp::updateLeds()
 
 	if (mSelected.size() > 0)
 	{
-		// remove uniques
-		sort(mSelected.begin(), mSelected.end());
-		auto mIt = unique(mSelected.begin(), mSelected.end());
-		mSelected.erase(mIt, mSelected.end());
-
-		string comMsg = to_string(mSelected[0]);
-		for (int s = 1; s < mSelected.size(); s++)
+		string comMsg = "{\"leds\": [";
+		for (int s = 0; s < mSelected.size(); s++)
 		{
-			comMsg += ",";
-			comMsg += to_string(mSelected[s]);
+			comMsg += mSelected[s].getJsonString();
+			if (s < mSelected.size() - 1)
+				comMsg += ", ";
 		}
-		comMsg += "\n"; //termination
-
+		comMsg += "]}\n"; //termination
+		
 		if (mUseSerial)
 		{
 			mCom->writeString(comMsg);
 			mCom->flush();
 		}
-
+		
 		console() << comMsg;
 	}
 }
@@ -169,15 +158,19 @@ void LivingColorClientApp::drawLEDs()
 	for (auto& l : mLeds)
 	{
 		int i = l.getId();
-		int found = std::count(mSelected.begin(), mSelected.end(), i);
-		l.show(found > 0);
+		auto lcl = std::find_if(mSelected.begin(), mSelected.end(),
+			[i](const LCLed& led) { return led.getId() == i; });
+		if(lcl==mSelected.end())
+			l.show(false, kLedRadius);
+		else
+			l.show(true, kLedRadius);
 	}
 }
 
 void prepareSettings(App::Settings* settings)
 {
 	settings->setWindowSize(kWindowWidth, kWindowHeight);
-	//settings->setConsoleWindowEnabled(true);
+	settings->setConsoleWindowEnabled(true);
 }
 
 CINDER_APP( LivingColorClientApp, RendererGl, *prepareSettings )

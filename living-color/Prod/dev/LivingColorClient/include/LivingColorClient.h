@@ -17,13 +17,22 @@ public:
 	LCLed(vec2 _pos, int _id) : mPos(_pos), mId(_id) {}
 	LCLed(float _x, float _y, Color _col, int _id) : mPos(vec2(_x, _y)), mColor(_col), mId(_id) {}
 
-	void show(bool isInside);
 	int getId() const { return mId; }
 	vec2 getPos() const { return mPos; }
 	vec3 getColor() const { return mColor; }
 	vec3 setCOlor(const vec3& color) { mColor = Color(color); }
-	string getJsonString() const {
+	void show(bool isInside, int ledRadius) {
+		Color col = isInside ? mColor : mColor * 0.33;
+		gl::color(col);
+		gl::drawSolidCircle(mPos, ledRadius);
+	}
 
+	string getJsonString() const {
+		Color8u c8u = Color8u(ColorModel::CM_RGB, mColor);
+		return "{\"id\": " + to_string(mId) + \
+			", \"color\": [" + to_string(c8u.r) + \
+			", " + to_string(c8u.g) + \
+			", " + to_string(c8u.b) + "]}";
 	}
 
 private:
