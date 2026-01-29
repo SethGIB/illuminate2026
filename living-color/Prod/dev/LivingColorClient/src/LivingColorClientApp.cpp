@@ -44,7 +44,7 @@ void LivingColorClientApp::draw()
 	gl::setMatricesWindow(getWindowSize());
 	gl::color(Color::white());
 	drawLEDs();
-
+	gl::color(Color::white());
 	gl::enableAlphaBlending();
 	//gl::draw(mFbo->getColorTexture());
 	
