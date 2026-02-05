@@ -28,8 +28,14 @@ private:
 	rs2::colorizer mRsColorizer;
 
 	gl::Texture2dRef mDepthTex;
-	gl::Texture2dRef mGrayTex;
 	gl::Texture2dRef mContoursTex;
+
+	cv::Mat mDepthMat;
+	cv::Mat mGrayMat;
+	cv::Mat mBinaryMat;
+	cv::Mat mContourMat;
+
+	vector<vector<cv::Point>> mContours;
 
 };
 
@@ -37,9 +43,15 @@ const int kWidth = 360;
 const int kHeight = 640;
 void RsCvTestApp::setup()
 {
-	mDepthTex = gl::Texture2d::create(kWidth, kHeight);
-	mGrayTex = gl::Texture2d::create(kWidth, kHeight);
+	auto txFormat = gl::Texture2d::Format().internalFormat(GL_RGB).dataType(GL_UNSIGNED_BYTE);
+
+	mDepthTex = gl::Texture2d::create(kWidth, kHeight, txFormat);
 	mContoursTex = gl::Texture2d::create(kWidth, kHeight);
+
+	mDepthMat = cv::Mat::zeros(kHeight, kWidth, CV_8UC3);
+	mGrayMat = cv::Mat::zeros(kHeight, kWidth, CV_8UC1);
+	mBinaryMat = cv::Mat::zeros(kHeight, kWidth, CV_8UC1);
+	mContourMat = cv::Mat::zeros(kHeight, kWidth, CV_8UC4);
 
 	mRsConfig.enable_stream(RS2_STREAM_DEPTH, 640, 360, RS2_FORMAT_Z16, 30);
 	vector<rs2_stream> streams = { RS2_STREAM_DEPTH };
@@ -68,7 +80,7 @@ void RsCvTestApp::draw()
 	gl::color(Color::white());
 	gl::draw(mDepthTex, vec2(0, 0));
 	gl::enableAlphaBlending(true);
-	gl::draw(mGrayTex);
+	gl::draw(mContoursTex, vec2(0, 0));
 	gl::enableAlphaBlending(false);
 }
 
@@ -81,24 +93,19 @@ void RsCvTestApp::updateFrames()
 {
 	auto frames = mRs.wait_for_frames();
 	auto depth_frame = frames.get_depth_frame().apply_filter(mRsRotFilter).apply_filter(mRsThreshFilter).apply_filter(mRsColorizer);
-	
-	mDepthTex->update(depth_frame.get_data(), GL_RGB, GL_UNSIGNED_BYTE, 0, kWidth, kHeight);
-	cv::Mat depthMat(toOcv(mDepthTex->createSource()));
-	cv::Mat depthGrayMat(kHeight, kWidth, CV_8UC1);
-	cv::Mat threshMat(kHeight, kWidth, CV_8UC1);
 
-	int dataSize = depth_frame.get_data_size();
-	int step = dataSize / (kHeight);
+	mDepthMat.data = (uchar*)depth_frame.get_data();
+	mDepthTex->update(mDepthMat.data, GL_RGB, GL_UNSIGNED_BYTE, 0, kWidth, kHeight);
 
-	cv::Mat contourMat(kHeight, kWidth, CV_8UC4);
-	contourMat.setTo(cv::Scalar(0, 0, 0, 0));
-	vector<vector<cv::Point>> contours;
+	mContours.clear();
+	mContourMat.setTo(cv::Scalar(0,0,0,0));
 
-	cv::cvtColor(depthMat, depthGrayMat, cv::COLOR_RGB2GRAY);
-	cv::threshold(depthGrayMat, threshMat, 50, 255, cv::THRESH_BINARY);
-	cv::findContours(threshMat, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
-	cv::drawContours(contourMat, contours, -1, cv::Scalar(0, 0, 255 , 192), 2);
-	mGrayTex = gl::Texture2d::create(fromOcv(contourMat));
+	cv::cvtColor(mDepthMat, mGrayMat, cv::COLOR_RGB2GRAY);
+	cv::threshold(mGrayMat, mBinaryMat, 50, 255, cv::THRESH_BINARY);
+	cv::findContours(mBinaryMat, mContours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
+	cv::drawContours(mContourMat, mContours, -1, cv::Scalar(255, 64, 0 , 255), 4);
+
+	mContoursTex->update(mContourMat.data, GL_RGBA, GL_UNSIGNED_BYTE, 0, kWidth, kHeight);
 }
 
 static void prepareSettings( App::Settings *settings )
