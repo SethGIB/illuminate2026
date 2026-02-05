@@ -11,13 +11,16 @@ const int kNumLedsY = 32;
 const int kLedRadiusX = kWindowWidth / (float)(kNumLedsX * 2);
 const int kLedRadiusY = kWindowHeight / (float)(kNumLedsY * 2);
 
-const int kSwitchGroupFrames = 45;
+const string kPortName = "COM7"; //"COM3" for windows, "/dev/tty.usbmodem14101" for mac
+const int kBaudRate = 115200;
 
 void LivingColorClientFXApp::setup()
 {
 	setupImages();
 	setupLeds();
 	setupRs();
+
+	mPortIsOpen = setupCom(kPortName, kBaudRate);
 }
 
 void LivingColorClientFXApp::mouseDown( MouseEvent event )
@@ -51,6 +54,10 @@ void LivingColorClientFXApp::keyDown(KeyEvent event)
 void LivingColorClientFXApp::update()
 {
 	updateFrames();
+	if(mPortIsOpen)
+	{
+		updateCom();
+	}
 }
 
 void LivingColorClientFXApp::draw()
@@ -81,6 +88,10 @@ void LivingColorClientFXApp::draw()
 void LivingColorClientFXApp::cleanup()
 {
 	mRs.stop();
+	if(mPortIsOpen)
+	{
+		mCom->flush();
+	}
 }
 
 void LivingColorClientFXApp::setupRs()
@@ -136,6 +147,23 @@ void LivingColorClientFXApp::setupImages()
 	mContourMat = cv::Mat::zeros(kHeight, kWidth, CV_8UC4);
 }
 
+bool LivingColorClientFXApp::setupCom(const string &port, const int &baud)
+{
+	bool ret = false;
+	try
+	{
+		auto comPort = Serial::Device(port);
+		mCom = Serial::create(comPort, baud);
+		ret = true;
+	}
+	catch (SerialExc& e)
+	{
+		console() << e.what() << endl;
+	}
+
+	return ret;
+}
+
 void LivingColorClientFXApp::updateFrames()
 {
 	auto frames = mRs.wait_for_frames();
@@ -171,6 +199,13 @@ void LivingColorClientFXApp::updateFrames()
 	{
 		mBinaryTex->update(mBinaryMat.data, GL_RED, GL_UNSIGNED_BYTE, 0, kWidth, kHeight);
 	}
+}
+
+void LivingColorClientFXApp::updateCom()
+{
+	auto data = to_string(mContours.size()) + "\n"; //replace with json LED map
+	mCom->writeString(data);
+	mCom->flush();
 }
 
 void LivingColorClientFXApp::drawLeds()

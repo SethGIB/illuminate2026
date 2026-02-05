@@ -56,8 +56,11 @@ private:
 	void setupRs();
 	void setupLeds();
 	void setupImages();
+	bool setupCom(const string &port, const int &baud);
 
 	void updateFrames(); //get depth data, post process (rot, thresh), update cv::Mat, scale, find contours
+	void updateCom();
+
 	void drawLeds();
 	void drawMain();	//default drawing mode
 
@@ -86,4 +89,7 @@ private:
 	gl::Texture2dRef mContoursTex;
 
 	DrawMode mDrawMode = DrawMode::MAIN;
+
+	bool mPortIsOpen = false;
+	SerialRef mCom;
 };
