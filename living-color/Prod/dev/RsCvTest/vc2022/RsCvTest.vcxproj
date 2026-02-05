@@ -1,0 +1,145 @@
+<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{B21D8E22-E141-4DC7-BF52-DD1AC40DCB67}</ProjectGuid>
+    <RootNamespace>RsCvTest</RootNamespace>
+    <Keyword>Win32Proj</Keyword>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+    <WholeProgramOptimization>false</WholeProgramOptimization>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings" />
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</LinkIncremental>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>..\include;$(CINDER_PATH)\include;$(CINDER_PATH)\blocks\Cinder-OpenCV3\include;$(CINDER_PATH)\blocks\Cinder-RealSense2\include;$(CINDER_PATH)\blocks\Cinder-RealSense2\include\librealsense2;$(CINDER_PATH)\blocks\Cinder-RealSense2\include\librealsense2-gl</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_WIN32_WINNT=0x0601;_WINDOWS;NOMINMAX;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <PrecompiledHeader />
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+    </ClCompile>
+    <ResourceCompile>
+      <AdditionalIncludeDirectories>$(CINDER_PATH)\include;..\include</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Link>
+      <AdditionalDependencies>cinder.lib;OpenGL32.lib;opencv_calib3d300d.lib;opencv_core300d.lib;opencv_features2d300d.lib;opencv_flann300d.lib;opencv_hal300d.lib;opencv_imgproc300d.lib;opencv_ml300d.lib;opencv_objdetect300d.lib;opencv_photo300d.lib;opencv_shape300d.lib;opencv_stitching300d.lib;opencv_superres300d.lib;opencv_ts300d.lib;opencv_video300d.lib;opencv_videostab300d.lib;ippicvmt.lib;realsense2-all.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(CINDER_PATH)\lib\msw\$(PlatformTarget);$(CINDER_PATH)\lib\msw\$(PlatformTarget)\$(Configuration)\$(PlatformToolset);$(CINDER_PATH)\blocks\Cinder-OpenCV3\lib\vc2015\$(PlatformTarget);$(CINDER_PATH)\blocks\Cinder-RealSense2\lib\msw\$(PlatformTarget)\$(Configuration)\$(PlatformToolset)</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention />
+      <IgnoreSpecificDefaultLibraries>LIBCMT;LIBCPMT</IgnoreSpecificDefaultLibraries>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>..\include;$(CINDER_PATH)\include;$(CINDER_PATH)\blocks\Cinder-OpenCV3\include;$(CINDER_PATH)\blocks\Cinder-RealSense2\include;$(CINDER_PATH)\blocks\Cinder-RealSense2\include\librealsense2;$(CINDER_PATH)\blocks\Cinder-RealSense2\include\librealsense2-gl</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_WIN32_WINNT=0x0601;_WINDOWS;NOMINMAX;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <PrecompiledHeader />
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+    </ClCompile>
+    <ProjectReference>
+      <LinkLibraryDependencies>true</LinkLibraryDependencies>
+    </ProjectReference>
+    <ResourceCompile>
+      <AdditionalIncludeDirectories>$(CINDER_PATH)\include;..\include</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Link>
+      <AdditionalDependencies>cinder.lib;OpenGL32.lib;opencv_calib3d300.lib;opencv_core300.lib;opencv_features2d300.lib;opencv_flann300.lib;opencv_hal300.lib;opencv_imgproc300.lib;opencv_ml300.lib;opencv_objdetect300.lib;opencv_photo300.lib;opencv_shape300.lib;opencv_stitching300.lib;opencv_superres300.lib;opencv_ts300.lib;opencv_video300.lib;opencv_videostab300.lib;ippicvmt.lib;realsense2-all.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(CINDER_PATH)\lib\msw\$(PlatformTarget);$(CINDER_PATH)\lib\msw\$(PlatformTarget)\$(Configuration)\$(PlatformToolset);$(CINDER_PATH)\blocks\Cinder-OpenCV3\lib\vc2015\$(PlatformTarget);$(CINDER_PATH)\blocks\Cinder-RealSense2\lib\msw\$(PlatformTarget)\$(Configuration)\$(PlatformToolset)</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <GenerateMapFile>true</GenerateMapFile>
+      <SubSystem>Windows</SubSystem>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding />
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention />
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Resources.rc" />
+  </ItemGroup>
+  <ItemGroup />
+  <ItemGroup />
+  <ItemGroup>
+    <ClCompile Include="..\src\RsCvTestApp.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\include\Resources.h" />
+    <ClInclude Include="..\..\..\..\..\..\lib\Cinder\blocks\Cinder-OpenCV3\include\CinderOpenCV.h" />
+    <ClInclude Include="..\..\..\..\..\..\lib\Cinder\blocks\Cinder-RealSense2\include\librealsense2\rs.h" />
+    <ClInclude Include="..\..\..\..\..\..\lib\Cinder\blocks\Cinder-RealSense2\include\librealsense2\rs_advanced_mode.h" />
+    <ClInclude Include="..\..\..\..\..\..\lib\Cinder\blocks\Cinder-RealSense2\include\librealsense2\rsutil.h" />
+    <ClInclude Include="..\..\..\..\..\..\lib\Cinder\blocks\Cinder-RealSense2\include\librealsense2\rs.hpp" />
+    <ClInclude Include="..\..\..\..\..\..\lib\Cinder\blocks\Cinder-RealSense2\include\librealsense2\rs_advanced_mode.hpp" />
+    <ClInclude Include="..\..\..\..\..\..\lib\Cinder\blocks\Cinder-RealSense2\include\librealsense2\h\rs_advanced_mode_command.h" />
+    <ClInclude Include="..\..\..\..\..\..\lib\Cinder\blocks\Cinder-RealSense2\include\librealsense2\h\rs_config.h" />
+    <ClInclude Include="..\..\..\..\..\..\lib\Cinder\blocks\Cinder-RealSense2\include\librealsense2\h\rs_context.h" />
+    <ClInclude Include="..\..\..\..\..\..\lib\Cinder\blocks\Cinder-RealSense2\include\librealsense2\h\rs_device.h" />
+    <ClInclude Include="..\..\..\..\..\..\lib\Cinder\blocks\Cinder-RealSense2\include\librealsense2\h\rs_frame.h" />
+    <ClInclude Include="..\..\..\..\..\..\lib\Cinder\blocks\Cinder-RealSense2\include\librealsense2\h\rs_internal.h" />
+    <ClInclude Include="..\..\..\..\..\..\lib\Cinder\blocks\Cinder-RealSense2\include\librealsense2\h\rs_option.h" />
+    <ClInclude Include="..\..\..\..\..\..\lib\Cinder\blocks\Cinder-RealSense2\include\librealsense2\h\rs_pipeline.h" />
+    <ClInclude Include="..\..\..\..\..\..\lib\Cinder\blocks\Cinder-RealSense2\include\librealsense2\h\rs_processing.h" />
+    <ClInclude Include="..\..\..\..\..\..\lib\Cinder\blocks\Cinder-RealSense2\include\librealsense2\h\rs_record_playback.h" />
+    <ClInclude Include="..\..\..\..\..\..\lib\Cinder\blocks\Cinder-RealSense2\include\librealsense2\h\rs_sensor.h" />
+    <ClInclude Include="..\..\..\..\..\..\lib\Cinder\blocks\Cinder-RealSense2\include\librealsense2\h\rs_types.h" />
+    <ClInclude Include="..\..\..\..\..\..\lib\Cinder\blocks\Cinder-RealSense2\include\librealsense2\hpp\rs_context.hpp" />
+    <ClInclude Include="..\..\..\..\..\..\lib\Cinder\blocks\Cinder-RealSense2\include\librealsense2\hpp\rs_device.hpp" />
+    <ClInclude Include="..\..\..\..\..\..\lib\Cinder\blocks\Cinder-RealSense2\include\librealsense2\hpp\rs_export.hpp" />
+    <ClInclude Include="..\..\..\..\..\..\lib\Cinder\blocks\Cinder-RealSense2\include\librealsense2\hpp\rs_frame.hpp" />
+    <ClInclude Include="..\..\..\..\..\..\lib\Cinder\blocks\Cinder-RealSense2\include\librealsense2\hpp\rs_internal.hpp" />
+    <ClInclude Include="..\..\..\..\..\..\lib\Cinder\blocks\Cinder-RealSense2\include\librealsense2\hpp\rs_options.hpp" />
+    <ClInclude Include="..\..\..\..\..\..\lib\Cinder\blocks\Cinder-RealSense2\include\librealsense2\hpp\rs_pipeline.hpp" />
+    <ClInclude Include="..\..\..\..\..\..\lib\Cinder\blocks\Cinder-RealSense2\include\librealsense2\hpp\rs_processing.hpp" />
+    <ClInclude Include="..\..\..\..\..\..\lib\Cinder\blocks\Cinder-RealSense2\include\librealsense2\hpp\rs_record_playback.hpp" />
+    <ClInclude Include="..\..\..\..\..\..\lib\Cinder\blocks\Cinder-RealSense2\include\librealsense2\hpp\rs_sensor.hpp" />
+    <ClInclude Include="..\..\..\..\..\..\lib\Cinder\blocks\Cinder-RealSense2\include\librealsense2\hpp\rs_serializable_device.hpp" />
+    <ClInclude Include="..\..\..\..\..\..\lib\Cinder\blocks\Cinder-RealSense2\include\librealsense2\hpp\rs_types.hpp" />
+    <ClInclude Include="..\..\..\..\..\..\lib\Cinder\blocks\Cinder-RealSense2\include\librealsense2-gl\rs_processing_gl.h" />
+    <ClInclude Include="..\..\..\..\..\..\lib\Cinder\blocks\Cinder-RealSense2\include\librealsense2-gl\rs_processing_gl.hpp" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets" />
+</Project>

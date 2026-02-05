@@ -45,7 +45,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\include;$(CINDER_PATH)\include;$(CINDER_PATH)\blocks\Cinder-OpenCV3\include;$(CINDER_PATH)\blocks\CinderFx\src</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\include;$(CINDER_PATH)\include;$(CINDER_PATH)\blocks\Cinder-OpenCV3\include;$(CINDER_PATH)\blocks\CinderFx\src;$(CINDER_PATH)\blocks\Cinder-RealSense2\include</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_WIN32_WINNT=0x0601;_WINDOWS;NOMINMAX;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
@@ -59,8 +59,8 @@
       <AdditionalIncludeDirectories>"..\..\..\..\..\..\lib\Cinder\include";..\include</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>cinder.lib;OpenGL32.lib;opencv_core300d.lib;opencv_imgproc300d.lib;opencv_hal300d.lib;ippicvmt.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(CINDER_PATH)\lib\msw\$(PlatformTarget);$(CINDER_PATH)\lib\msw\$(PlatformTarget)\$(Configuration)\$(PlatformToolset);$(CINDER_PATH)\blocks\Cinder-OpenCV3\lib\vc2015\$(PlatformTarget)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>cinder.lib;OpenGL32.lib;realsense2-all.lib;opencv_core300d.lib;opencv_imgproc300d.lib;opencv_hal300d.lib;ippicvmt.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(CINDER_PATH)\lib\msw\$(PlatformTarget);$(CINDER_PATH)\lib\msw\$(PlatformTarget)\$(Configuration)\$(PlatformToolset);$(CINDER_PATH)\blocks\Cinder-OpenCV3\lib\vc2015\$(PlatformTarget);$(CINDER_PATH)\blocks\Cinder-RealSense2\lib\msw\$(PlatformTarget)\$(Configuration)\$(PlatformToolset)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
       <RandomizedBaseAddress>false</RandomizedBaseAddress>
@@ -70,7 +70,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>..\include;$(CINDER_PATH)\include;$(CINDER_PATH)\blocks\Cinder-OpenCV3\include;$(CINDER_PATH)\blocks\CinderFx\src</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\include;$(CINDER_PATH)\include;$(CINDER_PATH)\blocks\Cinder-OpenCV3\include;$(CINDER_PATH)\blocks\CinderFx\src;$(CINDER_PATH)\blocks\Cinder-RealSense2\include</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_WIN32_WINNT=0x0601;_WINDOWS;NOMINMAX;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <PrecompiledHeader />
@@ -86,8 +86,8 @@
       <AdditionalIncludeDirectories>"..\..\..\..\..\..\lib\Cinder\include";..\include</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>cinder.lib;OpenGL32.lib;opencv_core300.lib;opencv_imgproc300.lib;opencv_hal300.lib;ippicvmt.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(CINDER_PATH)\lib\msw\$(PlatformTarget);$(CINDER_PATH)\lib\msw\$(PlatformTarget)\$(Configuration)\$(PlatformToolset);$(CINDER_PATH)\blocks\Cinder-OpenCV3\lib\vc2015\$(PlatformTarget)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>cinder.lib;OpenGL32.lib;realsense2-all.lib;opencv_core300.lib;opencv_imgproc300.lib;opencv_hal300.lib;ippicvmt.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(CINDER_PATH)\lib\msw\$(PlatformTarget);$(CINDER_PATH)\lib\msw\$(PlatformTarget)\$(Configuration)\$(PlatformToolset);$(CINDER_PATH)\blocks\Cinder-OpenCV3\lib\vc2015\$(PlatformTarget);$(CINDER_PATH)\blocks\Cinder-RealSense2\lib\msw\$(PlatformTarget)\$(Configuration)\$(PlatformToolset)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <GenerateMapFile>true</GenerateMapFile>
       <SubSystem>Windows</SubSystem>

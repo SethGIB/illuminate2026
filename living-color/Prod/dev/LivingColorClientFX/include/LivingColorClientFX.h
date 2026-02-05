@@ -3,42 +3,11 @@
 #include "cinder/app/RendererGl.h"
 #include "cinder/gl/gl.h"
 #include "CinderOpenCV.h"
+#include "librealsense2/rs.hpp"
 
 using namespace ci;
 using namespace ci::app;
 using namespace std;
-
-class FXImageGroup {
-public:
-	Surface8uRef mSrcImage;
-	cv::Mat mGrayMat;
-	cv::Mat mContoursOutMat;
-	vector<vector<cv::Point>> mContours;
-
-	FXImageGroup() {}
-	FXImageGroup(const string& assetPath);
-
-	bool mIsInitialized = false;
-	
-	void init();
-	void drawImage()
-	{
-		gl::color(Color(1, 1, 1));
-		gl::draw(gl::Texture::create((*mSrcImage)));
-	}
-
-	void drawContours()
-	{
-		gl::color(Color(1, 1, 1));
-		gl::draw(gl::Texture::create(fromOcv(mContoursOutMat)));
-	}
-
-	void drawGray()
-	{
-		gl::color(Color(1, 1, 1));
-		gl::draw(gl::Texture::create(fromOcv(mGrayMat)));
-	}
-};
 
 class FXLed
 {
@@ -51,10 +20,10 @@ public:
 	vec2 getPos() const { return mPos; }
 	vec3 getColor() const { return mColor; }
 	vec3 setCOlor(const vec3& color) { mColor = Color(color); }
-	void show(bool isInside, int ledRadius) const {
+	void show(bool isInside, int radX, int radY) const {
 		Color col = isInside ? mColor : mColor * 0.25;
 		gl::color(col);
-		gl::drawSolidCircle(mPos, ledRadius);
+		gl::drawSolidEllipse(mPos, radX, radY);
 	}
 
 private:
@@ -71,13 +40,23 @@ public:
 	void draw() override;
 
 private:
-	void setupImageGroups();
+	void setupRs();
 	void setupLeds();
-
+	void updateFrames(); //get depth data, post process (rot, thresh), update cv::Mat, scale, find contours
 	void drawLeds();
 
-	vector<FXImageGroup> mFXImageGroups;
 	vector<FXLed> mLeds;
+	vector<vector<cv::Point>> mContours;
 
-	int mCurrentImageGroupIndex = 0;
+	rs2::pipeline mRs;
+	rs2::config mRsConfig;
+
+	rs2::rotation_filter mRsRotFilter;
+	rs2::threshold_filter mRsThreshFilter;
+
+	rs2::colorizer mRsColorizer;
+
+	gl::Texture2dRef mDepthTex;
+	gl::Texture2dRef mGrayTex;
+	gl::Texture2dRef mContoursTex;
 };

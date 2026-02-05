@@ -1,41 +1,26 @@
 #include "LivingColorClientFX.h"
 
-FXImageGroup::FXImageGroup(const string& assetPath)
-{
-	ImageSource::Options options;
-	//options
-	mSrcImage = Surface8u::create(loadImage(loadAsset(assetPath), options, "png"));
-	mContoursOutMat = cv::Mat::zeros(mSrcImage->getHeight(), mSrcImage->getWidth(), CV_8UC4);
-	mGrayMat = cv::Mat::zeros(mSrcImage->getHeight(), mSrcImage->getWidth(), CV_8UC1);
-}
+const int kWidth = 360;
+const int kHeight = 640;
+const int kWindowWidth = 360;
+const int kWindowHeight = 640;
 
-void FXImageGroup::init()
-{
-	try {
-		cv::Mat tempMat = toOcv(*mSrcImage);
-		cv::cvtColor(tempMat, mGrayMat, cv::COLOR_RGB2GRAY);
-		cv::findContours(mGrayMat, mContours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
-		cv::drawContours(mContoursOutMat, mContours, -1, cv::Scalar(255, 255, 255, 128), 2);
-		mIsInitialized = true;
-	}
-	catch (cv::Exception& e) {
-		console() << "Error: " << e.what() << std::endl;
-	}
-}
-
-const int kWindowWidth = 500;
-const int kWindowHeight = 800;
 const float kFPS = 30.0f;
-const int kNumLedsX = 20;
-const int kNumLedsY = 30;
-const float kLedRadius = kWindowWidth / (kNumLedsX * 2.0f);
+const int kNumLedsX = 18;
+const int kNumLedsY = 32;
+const float kLedRadiusX = kWindowWidth / (float)(kNumLedsX * 2);
+const float kLedRadiusY = kWindowHeight / (float)(kNumLedsY * 2);
 
 const int kSwitchGroupFrames = 45;
 
 void LivingColorClientFXApp::setup()
 {
-	setupImageGroups();
+	mDepthTex = gl::Texture2d::create(kWidth, kHeight);
+	mGrayTex = gl::Texture2d::create(kWidth, kHeight);
+	mContoursTex = gl::Texture2d::create(kWidth, kHeight);
+
 	setupLeds();
+	setupRs();
 }
 
 void LivingColorClientFXApp::mouseDown( MouseEvent event )
@@ -44,57 +29,39 @@ void LivingColorClientFXApp::mouseDown( MouseEvent event )
 
 void LivingColorClientFXApp::update()
 {
-	if(getElapsedFrames() % kSwitchGroupFrames == 0 && !mFXImageGroups.empty())
-	{
-		mCurrentImageGroupIndex = (mCurrentImageGroupIndex + 1) % mFXImageGroups.size();
-	}
+	updateFrames();
 }
 
 void LivingColorClientFXApp::draw()
 {
-	gl::clear( Color( 0, 0, 0 ) ); 
+	/*gl::clear(Color(0, 0, 0));
 	drawLeds();
 	gl::enableAlphaBlending();
-	mFXImageGroups[mCurrentImageGroupIndex].drawContours();
-	gl::disableAlphaBlending();
+	gl::disableAlphaBlending();*/
+
+	gl::clear(Color(0, 0, 0));
+	gl::setMatricesWindow(getWindowSize());
+	drawLeds();
+	
+	gl::color(Color::white());
+	//gl::draw(mDepthTex, vec2(0, 0));
+	gl::enableAlphaBlending(true);
+	gl::draw(mGrayTex);
+	gl::enableAlphaBlending(false);
 
 }
 
-void LivingColorClientFXApp::setupImageGroups()
+void LivingColorClientFXApp::setupRs()
 {
-	const auto& assetDirs = getAssetDirectories();
-	if (assetDirs.size() == 1)
-	{
-		const auto& assetDir = assetDirs[0];
-		if (filesystem::exists(assetDir))
-		{
-			for (const auto& entry : filesystem::directory_iterator(assetDir))
-			{
-				if (entry.is_regular_file())
-				{
-					const auto& path = entry.path();
-					if (path.extension() == ".png")
-					{
-						FXImageGroup fxImageGroup(path.filename().string());
-						fxImageGroup.init();
-						if (fxImageGroup.mIsInitialized)
-						{
-							mFXImageGroups.push_back(fxImageGroup);
-							console() << "Loaded and initialized image: " << path.filename().string() << std::endl;
-						}
-						else
-						{
-							console() << "Failed to initialize image: " << path.filename().string() << std::endl;
-						}
-					}
-				}
-			}
-		}
-		else
-		{
-			console() << "Asset directory does not exist: " << assetDir.string() << std::endl;
-		}
-	}
+	mRsConfig.enable_stream(RS2_STREAM_DEPTH, 640, 360, RS2_FORMAT_Z16, 30);
+	vector<rs2_stream> streams = { RS2_STREAM_DEPTH };
+	mRsRotFilter = rs2::rotation_filter(streams);
+	mRsRotFilter.set_option(RS2_OPTION_ROTATION, -90.0f);
+
+	mRsThreshFilter = rs2::threshold_filter(0.5f, 1.5f);
+
+	mRsColorizer = rs2::colorizer(4);
+	mRs.start(mRsConfig);
 }
 
 void LivingColorClientFXApp::setupLeds()
@@ -122,20 +89,44 @@ void LivingColorClientFXApp::setupLeds()
 	}
 }
 
+void LivingColorClientFXApp::updateFrames()
+{
+	auto frames = mRs.wait_for_frames();
+	auto depth_frame = frames.get_depth_frame().apply_filter(mRsRotFilter).apply_filter(mRsThreshFilter).apply_filter(mRsColorizer);
+
+	mDepthTex->update(depth_frame.get_data(), GL_RGB, GL_UNSIGNED_BYTE, 0, kWidth, kHeight);
+	cv::Mat depthMat(toOcv(mDepthTex->createSource()));
+	cv::Mat depthGrayMat(kHeight, kWidth, CV_8UC1);
+	cv::Mat threshMat(kHeight, kWidth, CV_8UC1);
+
+	int dataSize = depth_frame.get_data_size();
+	int step = dataSize / (kHeight);
+
+	cv::Mat contourMat(kHeight, kWidth, CV_8UC4);
+	contourMat.setTo(cv::Scalar(0, 0, 0, 0));
+	mContours.clear();
+
+	cv::cvtColor(depthMat, depthGrayMat, cv::COLOR_RGB2GRAY);
+	cv::threshold(depthGrayMat, threshMat, 50, 255, cv::THRESH_BINARY);
+	cv::findContours(threshMat, mContours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
+	cv::drawContours(contourMat, mContours, -1, cv::Scalar(255, 255, 255, 192), 2);
+	mGrayTex = gl::Texture2d::create(fromOcv(contourMat));
+}
+
 void LivingColorClientFXApp::drawLeds()
 {
 	for (const FXLed& led : mLeds)
 	{
 		bool isInsideAnyContour = false;
-		for (const auto& contour : mFXImageGroups[mCurrentImageGroupIndex].mContours)
+		for( auto contour : mContours )
 		{
-			if (cv::pointPolygonTest(contour, cv::Point2f(led.getPos().x, led.getPos().y), false) >= 0)
+			if( cv::pointPolygonTest( contour, cv::Point2f( led.getPos().x, led.getPos().y ), false ) >= 0 )
 			{
 				isInsideAnyContour = true;
 				break;
 			}
 		}
-		led.show(isInsideAnyContour, kLedRadius);
+		led.show(isInsideAnyContour, kLedRadiusX, kLedRadiusY);
 	}
 
 }
