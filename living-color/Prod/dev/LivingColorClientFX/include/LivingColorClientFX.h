@@ -38,6 +38,7 @@ public:
 	void mouseDown(MouseEvent event) override;
 	void update() override;
 	void draw() override;
+	void cleanup() override;
 
 private:
 	void setupRs();
@@ -45,9 +46,9 @@ private:
 	void setupImages();
 
 	void updateFrames(); //get depth data, post process (rot, thresh), update cv::Mat, scale, find contours
-	\
+	
 	void drawLeds();
-
+	
 	vector<FXLed> mLeds;
 
 	rs2::pipeline mRs;
@@ -65,5 +66,16 @@ private:
 	gl::Texture2dRef mDepthTex;
 	gl::Texture2dRef mContoursTex;
 
+	// Demo Support
+	void demoDrawColor();
+	void demoDrawContours(bool drawDepth = true);
+	void demoDrawFull();
+	void updateDemo();
+
+	uint mDemoMode = 0;
+	bool mIsRunning = true;
+
+	gl::Texture2dRef mDemoColorTex;
+	ci::Timer mDemoTimer;
 
 };

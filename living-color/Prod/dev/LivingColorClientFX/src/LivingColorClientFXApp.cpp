@@ -13,42 +13,68 @@ const float kLedRadiusY = kWindowHeight / (float)(kNumLedsY * 2);
 
 const int kSwitchGroupFrames = 45;
 
+const double kDemoWaitTime = 5.0;
+const double kDemoRunTime = 6.0;
+
 void LivingColorClientFXApp::setup()
 {
 	setupImages();
 	setupLeds();
 	setupRs();
+
+	mDemoTimer = Timer(false);
+	mDemoTimer.start(0);
 }
 
 void LivingColorClientFXApp::mouseDown( MouseEvent event )
 {
+	if (mIsRunning == false)
+	{
+		mIsRunning = true;
+		mDemoTimer.start();
+	}
 }
 
 void LivingColorClientFXApp::update()
 {
 	updateFrames();
+	if(mIsRunning)
+		updateDemo();
 }
 
 void LivingColorClientFXApp::draw()
 {
 	gl::clear(Color(0, 0, 0));
 	gl::setMatricesWindow(getWindowSize());
-	drawLeds();
-	
-	gl::color(Color::white());
-	gl::enableAlphaBlending(true);
-	gl::pushMatrices();
-	gl::scale(vec2(1, -1));
-	gl::translate(vec2(0, -kWindowHeight));
-	gl::draw(mContoursTex);
-	gl::popMatrices();
-	gl::enableAlphaBlending(false);
+	if(mIsRunning)
+	{ 
+		switch (mDemoMode)
+		{
+		case 0:
+			break;
+		case 1:
+			demoDrawColor();
+			break;
+		case 2:
+			demoDrawContours(true);
+			break;
+		case 3:
+			demoDrawFull();
+			break;
+		}
+	}
+}
+
+void LivingColorClientFXApp::cleanup()
+{
+	mRs.stop();
 }
 
 void LivingColorClientFXApp::setupRs()
 {
 	mRsConfig.enable_stream(RS2_STREAM_DEPTH, 640, 360, RS2_FORMAT_Z16, 30);
-	vector<rs2_stream> streams = { RS2_STREAM_DEPTH };
+	mRsConfig.enable_stream(RS2_STREAM_COLOR, 640, 360, RS2_FORMAT_RGB8, 30);
+	vector<rs2_stream> streams = { RS2_STREAM_COLOR, RS2_STREAM_DEPTH };
 	mRsRotFilter = rs2::rotation_filter(streams);
 	mRsRotFilter.set_option(RS2_OPTION_ROTATION, -90.0f);
 
@@ -85,6 +111,9 @@ void LivingColorClientFXApp::setupLeds()
 
 void LivingColorClientFXApp::setupImages()
 {
+	//Color for demo
+	mDemoColorTex = gl::Texture2d::create(kWidth, kHeight, gl::Texture2d::Format().internalFormat(GL_RGB).dataType(GL_UNSIGNED_BYTE));
+	//
 	mDepthTex = gl::Texture2d::create(kWidth, kHeight, gl::Texture2d::Format().internalFormat(GL_RGB).dataType(GL_UNSIGNED_BYTE));
 	mContoursTex = gl::Texture2d::create(kWidth, kHeight);
 
@@ -97,6 +126,9 @@ void LivingColorClientFXApp::setupImages()
 void LivingColorClientFXApp::updateFrames()
 {
 	auto frames = mRs.wait_for_frames();
+	auto color_frame = frames.get_color_frame().apply_filter(mRsRotFilter);
+	mDemoColorTex->update((uchar*)color_frame.get_data(), GL_RGB, GL_UNSIGNED_BYTE, 0, kWidth, kHeight);
+
 	auto depth_frame = frames.get_depth_frame().apply_filter(mRsRotFilter).apply_filter(mRsThreshFilter).apply_filter(mRsColorizer);
 
 	mDepthMat.data = (uchar*)depth_frame.get_data();
@@ -108,10 +140,8 @@ void LivingColorClientFXApp::updateFrames()
 	cv::cvtColor(mDepthMat, mGrayMat, cv::COLOR_RGB2GRAY);
 	cv::threshold(mGrayMat, mBinaryMat, 50, 255, cv::THRESH_BINARY);
 
-	//rotate the binary mat
-	auto rotMatrix = cv::getRotationMatrix2D(cv::Point2f(kWidth / 2.0f, kHeight / 2.0f), 180, 1);
 	cv::Mat rotatedBinaryMat;
-	cv::warpAffine(mBinaryMat, rotatedBinaryMat, rotMatrix, mBinaryMat.size());
+	cv::flip(mBinaryMat, rotatedBinaryMat, 0);
 	cv::findContours(rotatedBinaryMat, mContours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
 
 	cv::drawContours(mContourMat, mContours, -1, cv::Scalar(255, 64, 0, 255), 4);
@@ -134,7 +164,55 @@ void LivingColorClientFXApp::drawLeds()
 		}
 		led.show(isInsideAnyContour, kLedRadiusX, kLedRadiusY);
 	}
+}
 
+void LivingColorClientFXApp::demoDrawColor()
+{
+	gl::color(Color::white());
+	gl::draw(mDemoColorTex);
+}
+
+void LivingColorClientFXApp::demoDrawContours(bool drawDepth)
+{
+	gl::color(Color::white());
+	if (drawDepth)
+	{
+		gl::draw(mDepthTex);
+	}
+	
+	gl::enableAlphaBlending(true);
+	gl::pushMatrices();
+	gl::scale(vec2(1, -1));
+	gl::translate(vec2(0, -kWindowHeight));
+	gl::draw(mContoursTex);
+	gl::popMatrices();
+	gl::enableAlphaBlending(false);
+}
+
+void LivingColorClientFXApp::demoDrawFull()
+{
+	drawLeds();
+	demoDrawContours(false);
+}
+
+void LivingColorClientFXApp::updateDemo()
+{
+	if (mDemoMode == 0 && mDemoTimer.getSeconds() > kDemoWaitTime)
+	{
+		mDemoMode = 1;
+		mDemoTimer.stop();
+		mDemoTimer.start();
+	}
+	else if (mDemoMode == 1 && mDemoTimer.getSeconds() > kDemoRunTime)
+	{
+		mDemoMode = 2;
+		mDemoTimer.stop();
+		mDemoTimer.start();
+	}
+	else if (mDemoMode == 2 && mDemoTimer.getSeconds() > kDemoRunTime)
+	{
+		mDemoMode = 3;
+	}
 }
 
 static void prepareSettings( App::Settings* settings )
