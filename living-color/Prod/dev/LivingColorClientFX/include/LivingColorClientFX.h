@@ -2,6 +2,7 @@
 #include "cinder/app/App.h"
 #include "cinder/app/RendererGl.h"
 #include "cinder/gl/gl.h"
+#include "cinder/Serial.h"
 #include "CinderOpenCV.h"
 #include "librealsense2/rs.hpp"
 
@@ -15,29 +16,41 @@ public:
 	FXLed() : mPos(vec2()), mId(-1) {}
 	FXLed(vec2 _pos, int _id) : mPos(_pos), mId(_id) {}
 	FXLed(float _x, float _y, Color _col, int _id) : mPos(vec2(_x, _y)), mColor(_col), mId(_id) {}
-
+	FXLed(float _x, float _y, int _rx, int _ry, Color _col, int _id) : mPos(vec2(_x, _y)), mColor(_col), mRads(vec2(_rx,_ry)), mId(_id) {}
 	int getId() const { return mId; }
 	vec2 getPos() const { return mPos; }
 	vec3 getColor() const { return mColor; }
 	vec3 setCOlor(const vec3& color) { mColor = Color(color); }
-	void show(bool isInside, int radX, int radY) const {
+	void show(bool isInside) const {
 		Color col = isInside ? mColor : mColor * 0.25;
 		gl::color(col);
-		gl::drawSolidEllipse(mPos, radX, radY);
+		gl::drawSolidEllipse(mPos, mRads.x, mRads.y);
 	}
 
 private:
 	vec2 mPos;
+	vec2 mRads;
 	Color mColor;
 	int mId;
+};
+
+enum class DrawMode
+{
+	MAIN,
+	DEBUG_COLOR,
+	DEBUG_GRAY,
+	DEBUG_BINARY,
+	DEBUG_CONTOURS
 };
 
 class LivingColorClientFXApp : public App {
 public:
 	void setup() override;
 	void mouseDown(MouseEvent event) override;
+	void keyDown(KeyEvent event) override;
 	void update() override;
 	void draw() override;
+	void cleanup() override;
 
 private:
 	void setupRs();
@@ -45,8 +58,12 @@ private:
 	void setupImages();
 
 	void updateFrames(); //get depth data, post process (rot, thresh), update cv::Mat, scale, find contours
-	\
 	void drawLeds();
+	void drawMain();	//default drawing mode
+
+	void debugDrawColor();
+	void debugDrawCv(int mode); //draw gray or binary
+	void debugDrawContours();
 
 	vector<FXLed> mLeds;
 
@@ -62,8 +79,11 @@ private:
 	cv::Mat mBinaryMat;
 	cv::Mat mContourMat;
 
+	gl::Texture2dRef mColorTex;
 	gl::Texture2dRef mDepthTex;
+	gl::Texture2dRef mGrayTex;
+	gl::Texture2dRef mBinaryTex;
 	gl::Texture2dRef mContoursTex;
 
-
+	DrawMode mDrawMode = DrawMode::MAIN;
 };
