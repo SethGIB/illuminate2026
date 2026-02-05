@@ -42,21 +42,28 @@ public:
 private:
 	void setupRs();
 	void setupLeds();
+	void setupImages();
+
 	void updateFrames(); //get depth data, post process (rot, thresh), update cv::Mat, scale, find contours
+	\
 	void drawLeds();
 
 	vector<FXLed> mLeds;
-	vector<vector<cv::Point>> mContours;
 
 	rs2::pipeline mRs;
 	rs2::config mRsConfig;
-
 	rs2::rotation_filter mRsRotFilter;
 	rs2::threshold_filter mRsThreshFilter;
-
 	rs2::colorizer mRsColorizer;
 
+	vector<vector<cv::Point>> mContours;
+	cv::Mat mDepthMat;
+	cv::Mat mGrayMat;
+	cv::Mat mBinaryMat;
+	cv::Mat mContourMat;
+
 	gl::Texture2dRef mDepthTex;
-	gl::Texture2dRef mGrayTex;
 	gl::Texture2dRef mContoursTex;
+
+
 };

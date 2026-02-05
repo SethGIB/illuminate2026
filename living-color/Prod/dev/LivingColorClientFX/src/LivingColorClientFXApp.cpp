@@ -15,10 +15,7 @@ const int kSwitchGroupFrames = 45;
 
 void LivingColorClientFXApp::setup()
 {
-	mDepthTex = gl::Texture2d::create(kWidth, kHeight);
-	mGrayTex = gl::Texture2d::create(kWidth, kHeight);
-	mContoursTex = gl::Texture2d::create(kWidth, kHeight);
-
+	setupImages();
 	setupLeds();
 	setupRs();
 }
@@ -34,21 +31,18 @@ void LivingColorClientFXApp::update()
 
 void LivingColorClientFXApp::draw()
 {
-	/*gl::clear(Color(0, 0, 0));
-	drawLeds();
-	gl::enableAlphaBlending();
-	gl::disableAlphaBlending();*/
-
 	gl::clear(Color(0, 0, 0));
 	gl::setMatricesWindow(getWindowSize());
 	drawLeds();
 	
 	gl::color(Color::white());
-	//gl::draw(mDepthTex, vec2(0, 0));
 	gl::enableAlphaBlending(true);
-	gl::draw(mGrayTex);
+	gl::pushMatrices();
+	gl::scale(vec2(1, -1));
+	gl::translate(vec2(0, -kWindowHeight));
+	gl::draw(mContoursTex);
+	gl::popMatrices();
 	gl::enableAlphaBlending(false);
-
 }
 
 void LivingColorClientFXApp::setupRs()
@@ -89,28 +83,40 @@ void LivingColorClientFXApp::setupLeds()
 	}
 }
 
+void LivingColorClientFXApp::setupImages()
+{
+	mDepthTex = gl::Texture2d::create(kWidth, kHeight, gl::Texture2d::Format().internalFormat(GL_RGB).dataType(GL_UNSIGNED_BYTE));
+	mContoursTex = gl::Texture2d::create(kWidth, kHeight);
+
+	mDepthMat = cv::Mat::zeros(kHeight, kWidth, CV_8UC3);
+	mGrayMat = cv::Mat::zeros(kHeight, kWidth, CV_8UC1);
+	mBinaryMat = cv::Mat::zeros(kHeight, kWidth, CV_8UC1);
+	mContourMat = cv::Mat::zeros(kHeight, kWidth, CV_8UC4);
+}
+
 void LivingColorClientFXApp::updateFrames()
 {
 	auto frames = mRs.wait_for_frames();
 	auto depth_frame = frames.get_depth_frame().apply_filter(mRsRotFilter).apply_filter(mRsThreshFilter).apply_filter(mRsColorizer);
 
-	mDepthTex->update(depth_frame.get_data(), GL_RGB, GL_UNSIGNED_BYTE, 0, kWidth, kHeight);
-	cv::Mat depthMat(toOcv(mDepthTex->createSource()));
-	cv::Mat depthGrayMat(kHeight, kWidth, CV_8UC1);
-	cv::Mat threshMat(kHeight, kWidth, CV_8UC1);
+	mDepthMat.data = (uchar*)depth_frame.get_data();
+	mDepthTex->update(mDepthMat.data, GL_RGB, GL_UNSIGNED_BYTE, 0, kWidth, kHeight);
 
-	int dataSize = depth_frame.get_data_size();
-	int step = dataSize / (kHeight);
-
-	cv::Mat contourMat(kHeight, kWidth, CV_8UC4);
-	contourMat.setTo(cv::Scalar(0, 0, 0, 0));
 	mContours.clear();
+	mContourMat.setTo(cv::Scalar(0, 0, 0, 0));
 
-	cv::cvtColor(depthMat, depthGrayMat, cv::COLOR_RGB2GRAY);
-	cv::threshold(depthGrayMat, threshMat, 50, 255, cv::THRESH_BINARY);
-	cv::findContours(threshMat, mContours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
-	cv::drawContours(contourMat, mContours, -1, cv::Scalar(255, 255, 255, 192), 2);
-	mGrayTex = gl::Texture2d::create(fromOcv(contourMat));
+	cv::cvtColor(mDepthMat, mGrayMat, cv::COLOR_RGB2GRAY);
+	cv::threshold(mGrayMat, mBinaryMat, 50, 255, cv::THRESH_BINARY);
+
+	//rotate the binary mat
+	auto rotMatrix = cv::getRotationMatrix2D(cv::Point2f(kWidth / 2.0f, kHeight / 2.0f), 180, 1);
+	cv::Mat rotatedBinaryMat;
+	cv::warpAffine(mBinaryMat, rotatedBinaryMat, rotMatrix, mBinaryMat.size());
+	cv::findContours(rotatedBinaryMat, mContours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
+
+	cv::drawContours(mContourMat, mContours, -1, cv::Scalar(255, 64, 0, 255), 4);
+
+	mContoursTex->update(mContourMat.data, GL_RGBA, GL_UNSIGNED_BYTE, 0, kWidth, kHeight);
 }
 
 void LivingColorClientFXApp::drawLeds()
