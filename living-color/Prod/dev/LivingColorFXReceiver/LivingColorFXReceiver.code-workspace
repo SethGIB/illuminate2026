@@ -1,0 +1,12 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		"python.analysis.stubPath": ".typings",
+		"python.analysis.typeshedPaths": [".venv/Lib/site-packages",".typings"],
+		"python.languageServer": "Pylance"
+	}
+}
