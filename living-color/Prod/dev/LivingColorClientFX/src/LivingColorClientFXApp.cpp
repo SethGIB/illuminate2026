@@ -6,21 +6,24 @@ const int kWindowWidth = 360;
 const int kWindowHeight = 640;
 
 const float kFPS = 30.0f;
-const int kNumLedsX = 18;
-const int kNumLedsY = 32;
+const int kNumLedsX = 12;
+const int kNumLedsY = 20;
 const int kLedRadiusX = kWindowWidth / (float)(kNumLedsX * 2);
 const int kLedRadiusY = kWindowHeight / (float)(kNumLedsY * 2);
 
 const string kPortName = "COM7"; //"COM3" for windows, "/dev/tty.usbmodem14101" for mac
-const int kBaudRate = 115200;
+const int kBaudRate = 2000000;
 
+const bool kUseSerial = false;
 void LivingColorClientFXApp::setup()
 {
 	setupImages();
 	setupLeds();
 	setupRs();
-
-	mPortIsOpen = setupCom(kPortName, kBaudRate);
+	
+	mFxSender = FXSender();
+	if(kUseSerial)
+		mFxSender.init(kPortName, kBaudRate);
 }
 
 void LivingColorClientFXApp::mouseDown( MouseEvent event )
@@ -54,10 +57,7 @@ void LivingColorClientFXApp::keyDown(KeyEvent event)
 void LivingColorClientFXApp::update()
 {
 	updateFrames();
-	if(mPortIsOpen)
-	{
-		updateCom();
-	}
+	updateLeds();
 }
 
 void LivingColorClientFXApp::draw()
@@ -88,10 +88,8 @@ void LivingColorClientFXApp::draw()
 void LivingColorClientFXApp::cleanup()
 {
 	mRs.stop();
-	if(mPortIsOpen)
-	{
-		mCom->flush();
-	}
+	if(kUseSerial)
+		mFxSender.close();
 }
 
 void LivingColorClientFXApp::setupRs()
@@ -126,8 +124,8 @@ void LivingColorClientFXApp::setupLeds()
 				x0 = lmap<float>(kNumLedsX - (x + 0.5f), 0, kNumLedsX, 0, kWindowWidth);
 			}
 
-			auto ledColor = Colorf(ColorModel::CM_HSV, lmap<float>(count, 0, kNumLedsX * kNumLedsY, 0.0f, 1.0f), 1.0f, 1.0f);
-			mLeds.push_back(FXLed(x0, y0, kLedRadiusX, kLedRadiusY, ledColor, count));
+			auto ledColor = Color8u(ColorModel::CM_HSV, lmap<float>(count, 0, kNumLedsX * kNumLedsY, 0.0f, 1.0f), 1.0f, 1.0f);
+			mLeds.push_back(FXLed(x0, y0, kLedRadiusX, kLedRadiusY, ledColor));
 			count += 1;
 		}
 	}
@@ -145,23 +143,6 @@ void LivingColorClientFXApp::setupImages()
 	mGrayMat = cv::Mat::zeros(kHeight, kWidth, CV_8UC1);
 	mBinaryMat = cv::Mat::zeros(kHeight, kWidth, CV_8UC1);
 	mContourMat = cv::Mat::zeros(kHeight, kWidth, CV_8UC4);
-}
-
-bool LivingColorClientFXApp::setupCom(const string &port, const int &baud)
-{
-	bool ret = false;
-	try
-	{
-		auto comPort = Serial::Device(port);
-		mCom = Serial::create(comPort, baud);
-		ret = true;
-	}
-	catch (SerialExc& e)
-	{
-		console() << e.what() << endl;
-	}
-
-	return ret;
 }
 
 void LivingColorClientFXApp::updateFrames()
@@ -201,31 +182,32 @@ void LivingColorClientFXApp::updateFrames()
 	}
 }
 
-void LivingColorClientFXApp::updateCom()
+void LivingColorClientFXApp::updateLeds()
 {
-	auto data = to_string(mContours.size()) + "\n"; //replace with json LED map
-	mCom->writeString(data);
-	mCom->flush();
-}
-
-void LivingColorClientFXApp::drawLeds()
-{
-	mActiveLeds.clear();
-	for (const FXLed& led : mLeds)
+	for (FXLed& led : mLeds)
 	{
 		bool isInsideAnyContour = false;
 		for( auto contour : mContours )
 		{
 			if( cv::pointPolygonTest( contour, cv::Point2f( led.getPos().x, led.getPos().y ), false ) >= 0 )
 			{
-				isInsideAnyContour = true;
-				mActiveLeds.push_back(led);
+				led.activate(true);
 				break;
 			}
 		}
-		led.show(isInsideAnyContour);
 	}
+	if (kUseSerial && mFxSender.isPortOpen())
+	{
+		mFxSender.sendFrame(mLeds);
+	}
+}
 
+void LivingColorClientFXApp::drawLeds()
+{
+	for (const FXLed& led : mLeds)
+	{
+		led.show();
+	}
 }
 
 void LivingColorClientFXApp::drawMain()

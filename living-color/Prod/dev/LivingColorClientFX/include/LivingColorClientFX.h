@@ -13,37 +13,75 @@ using namespace std;
 class FXLed
 {
 public:
-	FXLed() : mPos(vec2()), mId(-1) {}
-	FXLed(vec2 _pos, int _id) : mPos(_pos), mId(_id) {}
-	FXLed(float _x, float _y, Color _col, int _id) : mPos(vec2(_x, _y)), mColor(_col), mId(_id) {}
-	FXLed(float _x, float _y, int _rx, int _ry, Color _col, int _id) : mPos(vec2(_x, _y)), mColor(_col), mRads(vec2(_rx,_ry)), mId(_id) {}
-	int getId() const { return mId; }
+	FXLed() : mPos(vec2()) {}
+	FXLed(vec2 _pos) : mPos(_pos) {}
+	FXLed(float _x, float _y, Color _col) : mPos(vec2(_x, _y)), mColor(Color8u(_col)) {}
+	FXLed(float _x, float _y, int _rx, int _ry, Color _col) : mPos(vec2(_x, _y)), mColor(Color8u(_col)), mRads(vec2(_rx,_ry)) {}
 	vec2 getPos() const { return mPos; }
 	vec3 getColor() const { return mColor; }
-	vec3 setColor(const vec3& color) { mColor = Color(color); }
-	void step(bool isActive) {
-		mActive = isActive;
-	}
-	void show(bool isInside) const {
-		Color col = isInside ? mColor : mColor * 0.25;
+	vec3 setColor(const vec3& color) { mColor = Color8u(color); }
+
+	void show() const {
+		Colorf fColor = Colorf(mColor);
+		Color col = mActive ? fColor : fColor * 0.25;
 		gl::color(col);
 		gl::drawSolidEllipse(mPos, mRads.x, mRads.y);
 	}
 
-	string getJsonString() const {
-		Color8u c8u = Color8u(ColorModel::CM_RGB, mColor);
-		return "{\"id\": " + to_string(mId) + \
-			", \"color\": [" + to_string(c8u.r) + \
-			", " + to_string(c8u.g) + \
-			", " + to_string(c8u.b) + "]}";
-	}
-
+	void activate(bool isActive) { mActive = isActive; }	
+	bool isActive() const { return mActive; }
 private:
 	vec2 mPos;
 	vec2 mRads;
-	Color mColor;
-	int mId;
+	Color8u mColor;
 	bool mActive = false;
+};
+
+class FXSender {
+public:
+	FXSender() {}
+	void init(const string& port, const int& bps) {
+		try {
+			mSerial = Serial::create(Serial::Device(port), bps);
+			mFxBuffer.resize(FXSender::kFrameSize);
+			mPortIsOpen = true;
+		}
+		catch(SerialExc& e) {
+			console() << e.what() << endl;
+		}
+	}
+	void sendFrame(const vector<FXLed>& src) {
+		uint8_t counter = 0;
+		for (const FXLed &l : src)
+		{
+			Color8u col = l.isActive() ? Color8u(l.getColor()) : Color8u(l.getColor()) * 0.25;
+			mFxBuffer[counter * 3 + 0] = col.r;
+			mFxBuffer[counter * 3 + 1] = col.g;
+			mFxBuffer[counter * 3 + 2] = col.b;
+			counter += 1;
+		}
+
+		mSerial->writeBytes(mFxBuffer.data(), FXSender::kFrameSize);
+		mSerial->flush();
+	}
+
+	void close() {
+		if(mPortIsOpen)
+		{
+			mSerial->flush();
+			mSerial.reset();
+			mPortIsOpen = false;
+		}
+	}
+
+	bool isPortOpen() const { return mPortIsOpen; }
+	static const int kNumLeds = 240;
+	static const int kFrameSize = kNumLeds * 3;
+
+private:
+	SerialRef mSerial;
+	vector<uint8_t> mFxBuffer;
+	bool mPortIsOpen = false;
 };
 
 enum class DrawMode
@@ -68,10 +106,9 @@ private:
 	void setupRs();
 	void setupLeds();
 	void setupImages();
-	bool setupCom(const string &port, const int &baud);
 
 	void updateFrames(); //get depth data, post process (rot, thresh), update cv::Mat, scale, find contours
-	void updateCom();
+	void updateLeds(); //check if each led is inside any contour, set color accordingly, send to fx
 
 	void drawLeds();
 	void drawMain();	//default drawing mode
@@ -81,7 +118,6 @@ private:
 	void debugDrawContours();
 
 	vector<FXLed> mLeds;
-	vector<FXLed> mActiveLeds;
 
 	rs2::pipeline mRs;
 	rs2::config mRsConfig;
@@ -103,6 +139,5 @@ private:
 
 	DrawMode mDrawMode = DrawMode::MAIN;
 
-	bool mPortIsOpen = false;
-	SerialRef mCom;
+	FXSender mFxSender;
 };
