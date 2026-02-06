@@ -20,11 +20,22 @@ public:
 	int getId() const { return mId; }
 	vec2 getPos() const { return mPos; }
 	vec3 getColor() const { return mColor; }
-	vec3 setCOlor(const vec3& color) { mColor = Color(color); }
+	vec3 setColor(const vec3& color) { mColor = Color(color); }
+	void step(bool isActive) {
+		mActive = isActive;
+	}
 	void show(bool isInside) const {
 		Color col = isInside ? mColor : mColor * 0.25;
 		gl::color(col);
 		gl::drawSolidEllipse(mPos, mRads.x, mRads.y);
+	}
+
+	string getJsonString() const {
+		Color8u c8u = Color8u(ColorModel::CM_RGB, mColor);
+		return "{\"id\": " + to_string(mId) + \
+			", \"color\": [" + to_string(c8u.r) + \
+			", " + to_string(c8u.g) + \
+			", " + to_string(c8u.b) + "]}";
 	}
 
 private:
@@ -32,6 +43,7 @@ private:
 	vec2 mRads;
 	Color mColor;
 	int mId;
+	bool mActive = false;
 };
 
 enum class DrawMode
@@ -69,6 +81,7 @@ private:
 	void debugDrawContours();
 
 	vector<FXLed> mLeds;
+	vector<FXLed> mActiveLeds;
 
 	rs2::pipeline mRs;
 	rs2::config mRsConfig;

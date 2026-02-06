@@ -210,6 +210,7 @@ void LivingColorClientFXApp::updateCom()
 
 void LivingColorClientFXApp::drawLeds()
 {
+	mActiveLeds.clear();
 	for (const FXLed& led : mLeds)
 	{
 		bool isInsideAnyContour = false;
@@ -218,6 +219,7 @@ void LivingColorClientFXApp::drawLeds()
 			if( cv::pointPolygonTest( contour, cv::Point2f( led.getPos().x, led.getPos().y ), false ) >= 0 )
 			{
 				isInsideAnyContour = true;
+				mActiveLeds.push_back(led);
 				break;
 			}
 		}
