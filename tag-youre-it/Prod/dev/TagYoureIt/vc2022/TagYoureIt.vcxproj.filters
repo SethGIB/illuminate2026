@@ -1,0 +1,204 @@
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav</Extensions>
+    </Filter>
+    <Filter Include="Blocks">
+      <UniqueIdentifier>{E5C9029C-9D35-426E-8222-1C4F2D699FB9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Blocks\OpenCV3">
+      <UniqueIdentifier>{808DAF22-D074-4C03-8997-39C90858A8AE}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Blocks\OpenCV3\include">
+      <UniqueIdentifier>{D252CA87-3F11-44AC-93EB-2B515C6ABFCB}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Blocks\Cinder-RealSense2">
+      <UniqueIdentifier>{9E5D5ACB-CB81-4AE5-8983-9C441FFC4596}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Blocks\Cinder-RealSense2\include">
+      <UniqueIdentifier>{A3B70A17-71DB-4712-805F-B97284C050FF}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Blocks\Cinder-RealSense2\include\librealsense2">
+      <UniqueIdentifier>{A10DE0EE-23DC-4046-8999-C4DEAA880ECD}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Blocks\Cinder-RealSense2\include\librealsense2\h">
+      <UniqueIdentifier>{B435F200-1016-4591-9910-AF3FBE8DCD85}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Blocks\Cinder-RealSense2\include\librealsense2\hpp">
+      <UniqueIdentifier>{C548C845-778E-499B-8A34-A695FF32831B}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Blocks\Cinder-RealSense2\include\librealsense2-gl">
+      <UniqueIdentifier>{AD8CC79E-A04F-44EA-8C06-0AAF80AED856}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Blocks\CinderFluid">
+      <UniqueIdentifier>{D6D7A1A2-B876-4ACC-BC04-CA271F37379C}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Blocks\CinderFluid\src">
+      <UniqueIdentifier>{E3791B00-5269-4817-8D65-9864DA54A89F}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Blocks\CinderFluid\src\cinderfx">
+      <UniqueIdentifier>{803F48A5-B3BA-42B9-B742-1E7FFA22021E}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders">
+      <UniqueIdentifier>{5b704e86-d655-42cd-beb8-8b4b70472a1f}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\src\TagYoureItApp.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\TagYoureItApp.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClInclude Include="..\include\Resources.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\..\lib\Cinder\blocks\Cinder-OpenCV3\include\CinderOpenCV.h">
+      <Filter>Blocks\OpenCV3\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\..\lib\Cinder\blocks\Cinder-RealSense2\include\librealsense2\rs.h">
+      <Filter>Blocks\Cinder-RealSense2\include\librealsense2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\..\lib\Cinder\blocks\Cinder-RealSense2\include\librealsense2\rs_advanced_mode.h">
+      <Filter>Blocks\Cinder-RealSense2\include\librealsense2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\..\lib\Cinder\blocks\Cinder-RealSense2\include\librealsense2\rsutil.h">
+      <Filter>Blocks\Cinder-RealSense2\include\librealsense2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\..\lib\Cinder\blocks\Cinder-RealSense2\include\librealsense2\rs.hpp">
+      <Filter>Blocks\Cinder-RealSense2\include\librealsense2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\..\lib\Cinder\blocks\Cinder-RealSense2\include\librealsense2\rs_advanced_mode.hpp">
+      <Filter>Blocks\Cinder-RealSense2\include\librealsense2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\..\lib\Cinder\blocks\Cinder-RealSense2\include\librealsense2\h\rs_advanced_mode_command.h">
+      <Filter>Blocks\Cinder-RealSense2\include\librealsense2\h</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\..\lib\Cinder\blocks\Cinder-RealSense2\include\librealsense2\h\rs_config.h">
+      <Filter>Blocks\Cinder-RealSense2\include\librealsense2\h</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\..\lib\Cinder\blocks\Cinder-RealSense2\include\librealsense2\h\rs_context.h">
+      <Filter>Blocks\Cinder-RealSense2\include\librealsense2\h</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\..\lib\Cinder\blocks\Cinder-RealSense2\include\librealsense2\h\rs_device.h">
+      <Filter>Blocks\Cinder-RealSense2\include\librealsense2\h</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\..\lib\Cinder\blocks\Cinder-RealSense2\include\librealsense2\h\rs_frame.h">
+      <Filter>Blocks\Cinder-RealSense2\include\librealsense2\h</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\..\lib\Cinder\blocks\Cinder-RealSense2\include\librealsense2\h\rs_internal.h">
+      <Filter>Blocks\Cinder-RealSense2\include\librealsense2\h</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\..\lib\Cinder\blocks\Cinder-RealSense2\include\librealsense2\h\rs_option.h">
+      <Filter>Blocks\Cinder-RealSense2\include\librealsense2\h</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\..\lib\Cinder\blocks\Cinder-RealSense2\include\librealsense2\h\rs_pipeline.h">
+      <Filter>Blocks\Cinder-RealSense2\include\librealsense2\h</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\..\lib\Cinder\blocks\Cinder-RealSense2\include\librealsense2\h\rs_processing.h">
+      <Filter>Blocks\Cinder-RealSense2\include\librealsense2\h</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\..\lib\Cinder\blocks\Cinder-RealSense2\include\librealsense2\h\rs_record_playback.h">
+      <Filter>Blocks\Cinder-RealSense2\include\librealsense2\h</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\..\lib\Cinder\blocks\Cinder-RealSense2\include\librealsense2\h\rs_sensor.h">
+      <Filter>Blocks\Cinder-RealSense2\include\librealsense2\h</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\..\lib\Cinder\blocks\Cinder-RealSense2\include\librealsense2\h\rs_types.h">
+      <Filter>Blocks\Cinder-RealSense2\include\librealsense2\h</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\..\lib\Cinder\blocks\Cinder-RealSense2\include\librealsense2\hpp\rs_context.hpp">
+      <Filter>Blocks\Cinder-RealSense2\include\librealsense2\hpp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\..\lib\Cinder\blocks\Cinder-RealSense2\include\librealsense2\hpp\rs_device.hpp">
+      <Filter>Blocks\Cinder-RealSense2\include\librealsense2\hpp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\..\lib\Cinder\blocks\Cinder-RealSense2\include\librealsense2\hpp\rs_export.hpp">
+      <Filter>Blocks\Cinder-RealSense2\include\librealsense2\hpp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\..\lib\Cinder\blocks\Cinder-RealSense2\include\librealsense2\hpp\rs_frame.hpp">
+      <Filter>Blocks\Cinder-RealSense2\include\librealsense2\hpp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\..\lib\Cinder\blocks\Cinder-RealSense2\include\librealsense2\hpp\rs_internal.hpp">
+      <Filter>Blocks\Cinder-RealSense2\include\librealsense2\hpp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\..\lib\Cinder\blocks\Cinder-RealSense2\include\librealsense2\hpp\rs_options.hpp">
+      <Filter>Blocks\Cinder-RealSense2\include\librealsense2\hpp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\..\lib\Cinder\blocks\Cinder-RealSense2\include\librealsense2\hpp\rs_pipeline.hpp">
+      <Filter>Blocks\Cinder-RealSense2\include\librealsense2\hpp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\..\lib\Cinder\blocks\Cinder-RealSense2\include\librealsense2\hpp\rs_processing.hpp">
+      <Filter>Blocks\Cinder-RealSense2\include\librealsense2\hpp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\..\lib\Cinder\blocks\Cinder-RealSense2\include\librealsense2\hpp\rs_record_playback.hpp">
+      <Filter>Blocks\Cinder-RealSense2\include\librealsense2\hpp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\..\lib\Cinder\blocks\Cinder-RealSense2\include\librealsense2\hpp\rs_sensor.hpp">
+      <Filter>Blocks\Cinder-RealSense2\include\librealsense2\hpp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\..\lib\Cinder\blocks\Cinder-RealSense2\include\librealsense2\hpp\rs_serializable_device.hpp">
+      <Filter>Blocks\Cinder-RealSense2\include\librealsense2\hpp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\..\lib\Cinder\blocks\Cinder-RealSense2\include\librealsense2\hpp\rs_types.hpp">
+      <Filter>Blocks\Cinder-RealSense2\include\librealsense2\hpp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\..\lib\Cinder\blocks\Cinder-RealSense2\include\librealsense2-gl\rs_processing_gl.h">
+      <Filter>Blocks\Cinder-RealSense2\include\librealsense2-gl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\..\lib\Cinder\blocks\Cinder-RealSense2\include\librealsense2-gl\rs_processing_gl.hpp">
+      <Filter>Blocks\Cinder-RealSense2\include\librealsense2-gl</Filter>
+    </ClInclude>
+    <ClCompile Include="..\..\..\..\..\..\lib\Cinder\blocks\CinderFx\src\cinderfx\Fluid2D.cpp">
+      <Filter>Blocks\CinderFluid\src\cinderfx</Filter>
+    </ClCompile>
+    <ClInclude Include="..\..\..\..\..\..\lib\Cinder\blocks\CinderFx\src\cinderfx\Clamp.h">
+      <Filter>Blocks\CinderFluid\src\cinderfx</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\..\lib\Cinder\blocks\CinderFx\src\cinderfx\Fluid2D.h">
+      <Filter>Blocks\CinderFluid\src\cinderfx</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\..\lib\Cinder\blocks\CinderFx\src\cinderfx\Grid.h">
+      <Filter>Blocks\CinderFluid\src\cinderfx</Filter>
+    </ClInclude>
+    <ClCompile Include="..\src\WallBatch.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\include\Resources.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\TagYoureIt.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\WallBatch.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Resources.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\assets\shaders\blend_modes.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\assets\shaders\wall.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\assets\shaders\wall.vert">
+      <Filter>Shaders</Filter>
+    </None>
+  </ItemGroup>
+</Project>
