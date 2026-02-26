@@ -19,7 +19,7 @@ namespace TYI
 		// load textures from paths and bind to shader
 		void loadTextures(const std::string& diffuse, const std::string& normal, const std::string& arm, const std::string &grad);
 		void setupBatch();
-		void setActive(const bool& active);
+		void setActive(const bool& active); //bind or unbind textures
 		void step(const vec3& lightPos);
 		void show();
 

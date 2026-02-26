@@ -4,6 +4,7 @@ const int kWidth = 720;
 const int kHeight = 1280;
 const double kSwapTime = 8.0;
 const int kNumWalls = 3;
+
 void TagYoureItApp::setup()
 {
 	mWallTimer = ci::Timer(false);
@@ -15,10 +16,6 @@ void TagYoureItApp::setup()
 	mLightPosWorldSpace = vec3(0, 6, 3.67);
 
 	mWallTimer.start();
-}
-
-void TagYoureItApp::mouseDown( MouseEvent event )
-{
 }
 
 void TagYoureItApp::update()
@@ -81,17 +78,28 @@ void TagYoureItApp::draw()
 	}
 }
 
+void TagYoureItApp::cleanup()
+{
+	mPipe->stop();
+	mRs2Color->unbind(4);
+	mRs2Depth->unbind(5);
+
+	mBrickWall->setActive(false);
+	mConcreteWall->setActive(false);
+	mMetalWall->setActive(false);
+}
+
 void TagYoureItApp::setupImagePipeline()
 {
-	mRs2Color = gl::Texture2d::create(360, 640, gl::Texture2d::Format().internalFormat(GL_RGB).dataType(GL_UNSIGNED_BYTE));
-	mRs2Depth = gl::Texture2d::create(360, 640, gl::Texture2d::Format().internalFormat(GL_RED_INTEGER).dataType(GL_UNSIGNED_SHORT));
+	mRs2Color = gl::Texture2d::create(kWidth, kHeight, gl::Texture2d::Format().internalFormat(GL_RGB).dataType(GL_UNSIGNED_BYTE));
+	mRs2Depth = gl::Texture2d::create(kWidth, kHeight, gl::Texture2d::Format().internalFormat(GL_RED_INTEGER).dataType(GL_UNSIGNED_SHORT));
 	mRs2Color->bind(4);
 	mRs2Depth->bind(5);
 
 	mPipe = std::make_shared<rs2::pipeline>();
 	auto cfg = rs2::config();
-	cfg.enable_stream(RS2_STREAM_COLOR, 640, 360, RS2_FORMAT_RGB8, 30);
-	cfg.enable_stream(RS2_STREAM_DEPTH, 640, 360, RS2_FORMAT_Z16, 30);
+	cfg.enable_stream(RS2_STREAM_COLOR, kHeight, kWidth, RS2_FORMAT_RGB8, 30);
+	cfg.enable_stream(RS2_STREAM_DEPTH, kHeight, kWidth, RS2_FORMAT_Z16, 30);
 
 	mAlignToColor = std::make_shared<rs2::align>(RS2_STREAM_COLOR);
 	mColorizer = std::make_shared<rs2::colorizer>();
@@ -139,14 +147,14 @@ void TagYoureItApp::buildTheWalls()
 void TagYoureItApp::stepImagePipeline()
 {
 	auto frames = mPipe->wait_for_frames();
-	frames = mDepthThresholder->process(frames);
+	//frames = mDepthThresholder->process(frames);
 	frames = mAlignToColor->process(frames);
 	frames = mImgRotator->process(frames);
 	auto colorFrame = frames.get_color_frame();
-	auto depthFrame = frames.get_depth_frame();
+	auto depthFrame = frames.get_depth_frame().apply_filter(*mDepthThresholder);
 
-	mRs2Color->update(colorFrame.get_data(), GL_RGB, GL_UNSIGNED_BYTE, 0, 360, 640);
-	mRs2Depth->update(depthFrame.get_data(), GL_RED_INTEGER, GL_UNSIGNED_SHORT, 0, 360, 640);
+	mRs2Color->update(colorFrame.get_data(), GL_RGB, GL_UNSIGNED_BYTE, 0, kWidth, kHeight);
+	mRs2Depth->update(depthFrame.get_data(), GL_RED_INTEGER, GL_UNSIGNED_SHORT, 0, kWidth, kHeight);
 }
 
 static void prepareSettings( TagYoureItApp::Settings *settings )

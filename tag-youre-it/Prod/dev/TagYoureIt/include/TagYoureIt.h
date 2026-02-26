@@ -19,9 +19,9 @@ typedef std::shared_ptr<rs2::threshold_filter> Rs2ThresholderRef;
 class TagYoureItApp : public App {
 public:
 	void setup() override;
-	void mouseDown(MouseEvent event) override;
 	void update() override;
 	void draw() override;
+	void cleanup() override;
 
 private:
 	void setupImagePipeline();
