@@ -191,7 +191,7 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\assets\shaders\blend_modes.glsl">
+    <None Include="..\assets\shaders\blend_modes.frag">
       <Filter>Shaders</Filter>
     </None>
     <None Include="..\assets\shaders\wall.frag">
