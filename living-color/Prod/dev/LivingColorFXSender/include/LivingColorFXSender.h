@@ -45,7 +45,7 @@ public:
 	void init(const string& port, const int& bps) {
 		try {
 			mSerial = Serial::create(Serial::Device(port), bps);
-			mFxBuffer.resize(FXSender::kFrameSize);
+			mFxBuffer.resize(mFrameSize);
 			mPortIsOpen = true;
 		}
 		catch(SerialExc& e) {
@@ -56,14 +56,16 @@ public:
 		uint8_t counter = 0;
 		for (const FXLed &l : src)
 		{
-			Color8u col = l.isActive() ? Color8u(l.getColor()) : Color8u(l.getColor()) * 0.25;
+			if (counter >= src.size())
+				break;
+			Color8u col = l.isActive() ? Color8u(l.getColor()) : (Color8u(l.getColor() / 4));
 			mFxBuffer[counter * 3 + 0] = col.r;
 			mFxBuffer[counter * 3 + 1] = col.g;
 			mFxBuffer[counter * 3 + 2] = col.b;
 			counter += 1;
 		}
 
-		mSerial->writeBytes(mFxBuffer.data(), FXSender::kFrameSize);
+		mSerial->writeBytes(mFxBuffer.data(), mFrameSize);
 		mSerial->flush();
 	}
 
@@ -77,8 +79,8 @@ public:
 	}
 
 	bool isPortOpen() const { return mPortIsOpen; }
-	static const int kNumLeds = 240;
-	static const int kFrameSize = kNumLeds * 3;
+	int mNumLeds = 216;
+	int mFrameSize = mNumLeds * 3;
 
 private:
 	SerialRef mSerial;

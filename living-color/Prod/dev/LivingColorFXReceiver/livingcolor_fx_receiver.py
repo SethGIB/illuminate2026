@@ -1,6 +1,7 @@
 import sys
 import pygame
 import random
+import math
 import serial
 import logging
 
@@ -10,7 +11,7 @@ class FXLed:
         self.led_color = src_color
 
     def show(self, target_srf):
-        pygame.draw.ellipse(target_srf, self.led_color, self.bounds)
+        pygame.draw.rect(target_srf, self.led_color, self.bounds)
 
 ###
 # SERIAL COMMUNICATION ####################################################################
@@ -54,8 +55,8 @@ def lin_map(x, input_start, input_end, output_start, output_end):
 
 def setup_leds(num_x, num_y, win_w, win_h):
     led_list = []
-    rect_w = win_w/num_x
-    rect_h = win_h/num_y
+    rect_w = math.ceil(win_w/num_x)
+    rect_h = math.ceil(win_h/num_y)
 
     count = 0
     for y in range(num_y):
@@ -98,20 +99,24 @@ def update_event_loop():
 poll serial port
 get bytes and return list of color tuples
 '''
-def update_frame(use_serial=True, srl_ref=None, num_leds=240):
-    color_list = []
 
+def update_frame(last_frame, use_serial=True, srl_ref=None, num_leds=216):
+    color_list = last_frame
     if use_serial and srl_ref:
         if srl_ref.in_waiting:
-            rgb_list = serial_send(srl_ref, bytes_to_read=srl_ref.in_waiting)
+            #rgb_list = serial_send(srl_ref, bytes_to_read=srl_ref.in_waiting)
+            rgb_list = serial_rcv(srl_ref, num_bytes=srl_ref.in_waiting)
             if rgb_list and len(rgb_list) > 0:
+                logging.info(f"Received {len(rgb_list)} bytes from Serial Port")
+                obj_count = len(rgb_list) // 3    
                 led_color = ()
-                for i in range(0, num_leds):
+                color_list = [(0,0,0)] * obj_count
+                for i in range(0, obj_count):
                     r_val = rgb_list[i*3]
                     g_val = rgb_list[i*3+1]
                     b_val = rgb_list[i*3+2]
                     led_color = (r_val, g_val, b_val)
-                    color_list.append(led_color)
+                    color_list[i] = led_color
             
             else:
                 logging.info("No Serial Data")
@@ -124,15 +129,15 @@ def update_frame(use_serial=True, srl_ref=None, num_leds=240):
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
     
-    USE_SERIAL = False
+    USE_SERIAL = True
     COM_ENABLED = False
     
     ### SERIAL SETUP ######################################################################
     SERIAL_PORT = None
     PORT_NAME = "COM8"
     BAUD = 115200
-    WRITE_TIMEOUT = 1
-    READ_TIMEOUT = 1
+    WRITE_TIMEOUT = 0
+    READ_TIMEOUT = 0
 
     if USE_SERIAL:
         SERIAL_PORT = setup_com(PORT_NAME, BAUD, READ_TIMEOUT, WRITE_TIMEOUT)
@@ -144,21 +149,22 @@ if __name__ == "__main__":
 
     ### PYGAME SETUP ######################################################################
     pygame.init()
-    WIN_W = 480
-    WIN_H = 800
+    WIN_W = 540
+    WIN_H = 960
     WINDOW = pygame.display.set_mode((WIN_W, WIN_H))
     CANVAS = pygame.Surface(WINDOW.get_size())
     CANVAS = CANVAS.convert()
     CANVAS.fill("black")
 
     TICK = pygame.time.Clock()
-    FPS = 30.0
+    FPS = 15.0
     TICK_TIME = 1.0/FPS
 
     RUN_LOOP = True
 
     NUM_RECTS_X = 12
-    NUM_RECTS_Y = 20
+    NUM_RECTS_Y = 18
+    NUM_LEDS = NUM_RECTS_X * NUM_RECTS_Y
     rect_w = WIN_W/NUM_RECTS_X
     rect_h = WIN_H/NUM_RECTS_Y
 
@@ -172,12 +178,9 @@ if __name__ == "__main__":
         
         WINDOW.fill("black")
 
-        led_colors = update_frame(USE_SERIAL, SERIAL_PORT)
-        if USE_SERIAL:
-            if len(led_colors) == 0:
-                logging.info("No LED Colors Received")
-            else:
-                update_leds(led_colors, led_list)
+        led_colors = update_frame(led_colors, USE_SERIAL, SERIAL_PORT)
+        
+        update_leds(led_colors, led_list)
         show_leds(CANVAS, led_list)
 
         WINDOW.blit(CANVAS,(0,0))
