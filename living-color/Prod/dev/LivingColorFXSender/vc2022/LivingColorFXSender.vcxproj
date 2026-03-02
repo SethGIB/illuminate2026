@@ -100,13 +100,19 @@
   <ItemGroup>
     <ResourceCompile Include="Resources.rc" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <None Include="..\assets\shaders\passthru.vert" />
+    <None Include="..\assets\shaders\plasma_classic.frag" />
+    <None Include="..\assets\shaders\plasma_tech.frag" />
+  </ItemGroup>
   <ItemGroup />
   <ItemGroup>
     <ClCompile Include="..\src\LivingColorFXSenderApp.cpp" />
+    <ClCompile Include="..\src\Plasma.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\LivingColorFXSender.h" />
+    <ClInclude Include="..\include\Plasma.h" />
     <ClInclude Include="..\include\Resources.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

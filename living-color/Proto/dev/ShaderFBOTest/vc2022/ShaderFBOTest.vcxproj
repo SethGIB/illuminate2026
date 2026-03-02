@@ -100,7 +100,10 @@
   <ItemGroup>
     <ResourceCompile Include="Resources.rc" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <None Include="..\assets\shaders\plasma.frag" />
+    <None Include="..\assets\shaders\plasma.vert" />
+  </ItemGroup>
   <ItemGroup />
   <ItemGroup>
     <ClCompile Include="..\src\ShaderFBOTestApp.cpp" />

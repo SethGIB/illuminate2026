@@ -5,6 +5,7 @@
 #include "cinder/Serial.h"
 #include "CinderOpenCV.h"
 #include "librealsense2/rs.hpp"
+#include "Plasma.h"
 
 using namespace ci;
 using namespace ci::app;
@@ -18,14 +19,15 @@ public:
 	FXLed(float _x, float _y, Color _col) : mPos(vec2(_x, _y)), mColor(Color8u(_col)) {}
 	FXLed(float _x, float _y, int _rx, int _ry, Color _col) : mPos(vec2(_x, _y)), mColor(Color8u(_col)), mRads(vec2(_rx,_ry)) {}
 	vec2 getPos() const { return mPos; }
-	vec3 getColor() const { return mColor; }
-	vec3 setColor(const vec3& color) { mColor = Color8u(color); }
+	Color8u getColor() const { return mColor; }
+	void setColor(const Color8u& color) { mColor = Color8u(color); }
 
 	void show() const {
 		Colorf fColor = Colorf(mColor);
 		Color col = mActive ? fColor : fColor * 0.25;
 		gl::color(col);
-		gl::drawSolidEllipse(mPos, mRads.x, mRads.y);
+		//gl::drawSolidEllipse(mPos, mRads.x, mRads.y);
+		gl::drawSolidRect(Rectf(mPos - mRads, mPos + mRads));
 	}
 
 	void activate(bool isActive) { mActive = isActive; }	
@@ -90,7 +92,9 @@ enum class DrawMode
 	DEBUG_COLOR,
 	DEBUG_GRAY,
 	DEBUG_BINARY,
-	DEBUG_CONTOURS
+	DEBUG_CONTOURS,
+	DEBUG_PLASMA,
+	DEBUG_LEDSONLY
 };
 
 class LivingColorFXSenderApp : public App {
@@ -106,6 +110,7 @@ private:
 	void setupRs();
 	void setupLeds();
 	void setupImages();
+	void setupPlasma();
 
 	void updateFrames(); //get depth data, post process (rot, thresh), update cv::Mat, scale, find contours
 	void updateLeds(); //check if each led is inside any contour, set color accordingly, send to fx
@@ -118,6 +123,12 @@ private:
 	void debugDrawContours();
 
 	vector<FXLed> mLeds;
+	
+	PlasmaRef mPlasmaClassic;
+	PlasmaRef mPlasmaTech;
+	PlasmaRef mPlasmaPsychedelic;
+	PlasmaRef mCurrentPlasma;
+
 
 	rs2::pipeline mRs;
 	rs2::config mRsConfig;
@@ -137,7 +148,7 @@ private:
 	gl::Texture2dRef mBinaryTex;
 	gl::Texture2dRef mContoursTex;
 
-	DrawMode mDrawMode = DrawMode::MAIN;
+	DrawMode mDrawMode;
 
 	FXSender mFxSender;
 };

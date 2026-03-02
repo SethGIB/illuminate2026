@@ -7,19 +7,26 @@ const int kWindowHeight = 640;
 
 const float kFPS = 30.0f;
 const int kNumLedsX = 12;
-const int kNumLedsY = 20;
-const int kLedRadiusX = kWindowWidth / (float)(kNumLedsX * 2);
-const int kLedRadiusY = kWindowHeight / (float)(kNumLedsY * 2);
+const int kNumLedsY = 18;
+const int kLedRadiusX = ceil(kWindowWidth / (float)(kNumLedsX * 2));
+const int kLedRadiusY = ceil(kWindowHeight / (float)(kNumLedsY * 2));
 
 const string kPortName = "COM7"; //"COM3" for windows, "/dev/tty.usbmodem14101" for mac
 const int kBaudRate = 2000000;
 
 const bool kUseSerial = false;
+const bool kUseRs = true;
+
 void LivingColorFXSenderApp::setup()
 {
-	setupImages();
+	mDrawMode = DrawMode::MAIN;
 	setupLeds();
-	setupRs();
+	setupPlasma();
+	if(kUseRs)
+	{
+		setupRs();
+		setupImages();
+	}
 	
 	mFxSender = FXSender();
 	if(kUseSerial)
@@ -56,7 +63,10 @@ void LivingColorFXSenderApp::keyDown(KeyEvent event)
 
 void LivingColorFXSenderApp::update()
 {
-	updateFrames();
+	if (kUseRs)
+	{
+		updateFrames();
+	}
 	updateLeds();
 }
 
@@ -64,7 +74,7 @@ void LivingColorFXSenderApp::draw()
 {
 	gl::clear(Color::black());
 	gl::setMatricesWindow(getWindowSize());
-
+	mCurrentPlasma->render(ivec2(kWidth, kHeight), Area(0, 0, kWindowWidth, kWindowHeight));
 	switch (mDrawMode)
 	{
 		case DrawMode::MAIN:
@@ -82,14 +92,25 @@ void LivingColorFXSenderApp::draw()
 		case DrawMode::DEBUG_CONTOURS:
 			debugDrawContours();
 			break;
+		case DrawMode::DEBUG_PLASMA:
+			gl::draw(mCurrentPlasma->getTexture(), getWindowBounds());
+			break;
+		case DrawMode::DEBUG_LEDSONLY:
+			drawLeds();
+			break;
 	}	
 }
 
 void LivingColorFXSenderApp::cleanup()
 {
-	mRs.stop();
-	if(kUseSerial)
+	if (kUseRs)
+	{
+		mRs.stop();
+	}
+	if (kUseSerial)
+	{
 		mFxSender.close();
+	}
 }
 
 void LivingColorFXSenderApp::setupRs()
@@ -124,7 +145,7 @@ void LivingColorFXSenderApp::setupLeds()
 				x0 = lmap<float>(kNumLedsX - (x + 0.5f), 0, kNumLedsX, 0, kWindowWidth);
 			}
 
-			auto ledColor = Color8u(ColorModel::CM_HSV, lmap<float>(count, 0, kNumLedsX * kNumLedsY, 0.0f, 1.0f), 1.0f, 1.0f);
+			auto ledColor = Color8u(64,64,64);
 			mLeds.push_back(FXLed(x0, y0, kLedRadiusX, kLedRadiusY, ledColor));
 			count += 1;
 		}
@@ -143,6 +164,17 @@ void LivingColorFXSenderApp::setupImages()
 	mGrayMat = cv::Mat::zeros(kHeight, kWidth, CV_8UC1);
 	mBinaryMat = cv::Mat::zeros(kHeight, kWidth, CV_8UC1);
 	mContourMat = cv::Mat::zeros(kHeight, kWidth, CV_8UC4);
+}
+
+void LivingColorFXSenderApp::setupPlasma()
+{
+	mPlasmaClassic = Plasma::create();
+	mPlasmaClassic->init("shaders/passthru.vert", "shaders/plasma_classic.frag", "textures/classic/TX_Noise_Classic.png", "textures/classic/TX_Grad_Classic.png", ivec2(kWidth, kHeight));
+
+	//mPlasmaTech = Plasma::create();
+	//mPlasmaTech->init("shaders/passthru.vert", "shaders/plasma_tech.frag", "textures/TX_Noise_Tech.png", "textures/TX_Grad_Tech.png", ivec2(kWidth, kHeight));
+
+	mCurrentPlasma = mPlasmaClassic;
 }
 
 void LivingColorFXSenderApp::updateFrames()
@@ -184,16 +216,29 @@ void LivingColorFXSenderApp::updateFrames()
 
 void LivingColorFXSenderApp::updateLeds()
 {
+	auto surf = mCurrentPlasma->getPixels();
 	for (FXLed& led : mLeds)
 	{
-		bool isInsideAnyContour = false;
-		for( auto contour : mContours )
+		auto lPos = led.getPos();
+		ivec2 scaledPos = ivec2(lmap<float>(lPos.x, 0, kWindowWidth, 0, kWidth), lmap<float>(lPos.y, 0, kWindowHeight, 0, kHeight));
+		auto pixelColor = surf.getPixel(scaledPos);
+		led.setColor(Color8u(pixelColor.r, pixelColor.g, pixelColor.b));
+		led.activate(false);
+		if (kUseRs)
 		{
-			if( cv::pointPolygonTest( contour, cv::Point2f( led.getPos().x, led.getPos().y ), false ) >= 0 )
+			bool isInsideAnyContour = false;
+			for (auto contour : mContours)
 			{
-				led.activate(true);
-				break;
+				if (cv::pointPolygonTest(contour, cv::Point2f(led.getPos().x, led.getPos().y), false) >= 0)
+				{
+					led.activate(true);
+					break;
+				}
 			}
+		}
+		else
+		{
+			led.activate(true);
 		}
 	}
 	if (kUseSerial && mFxSender.isPortOpen())
@@ -214,14 +259,14 @@ void LivingColorFXSenderApp::drawMain()
 {
 	drawLeds();
 
-	gl::color(Color::white());
-	gl::enableAlphaBlending(true);
-	gl::pushMatrices();
-	gl::scale(vec2(1, -1));
-	gl::translate(vec2(0, -kWindowHeight));
-	gl::draw(mContoursTex);
-	gl::popMatrices();
-	gl::enableAlphaBlending(false);
+	//gl::color(Color::white());
+	//gl::enableAlphaBlending(true);
+	//gl::pushMatrices();
+	//gl::scale(vec2(1, -1));
+	//gl::translate(vec2(0, -kWindowHeight));
+	//gl::draw(mContoursTex);
+	//gl::popMatrices();
+	//gl::disableAlphaBlending();
 
 }
 

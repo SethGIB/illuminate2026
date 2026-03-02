@@ -3,10 +3,7 @@
 uniform vec2 uResolution;
 uniform float ciElapsedSeconds;
 
-uniform sampler2D uTxBase;
-uniform sampler2D uTxMid;
-uniform sampler2D uTxCoarse;
-uniform sampler2D uTxFine;
+uniform sampler2D uTxNoise;
 uniform sampler2D uTxGrad;
 
 in vec2 vTexCoord0;
@@ -16,10 +13,10 @@ void main()
 {
     //vec2 uv = gl_FragCoord.xy/uResolution;
     vec2 uv = vTexCoord0 * vec2(0.5625,1.0);
-	float baseTx = texture(uTxBase, vec2(uv.x+cos(ciElapsedSeconds*0.1),uv.y-sin(ciElapsedSeconds*0.0445))).r;
-	float midTx = texture(uTxMid, vec2(uv.x-sin(ciElapsedSeconds*0.2),uv.y+cos(ciElapsedSeconds*0.056))).r;
-	float crsTx = texture(uTxCoarse, vec2(uv.x-cos(ciElapsedSeconds*0.07),uv.y+sin(ciElapsedSeconds*0.11))).r;
-	float finTx = texture(uTxFine, vec2(uv.x+sin(ciElapsedSeconds*0.033),uv.y-cos(ciElapsedSeconds*0.05))).r;
+	float baseTx = texture(uTxNoise, vec2(uv.x+cos(ciElapsedSeconds*0.1),uv.y-sin(ciElapsedSeconds*0.0445))).r;
+	float midTx = texture(uTxNoise, vec2(uv.x-sin(ciElapsedSeconds*0.2),uv.y+cos(ciElapsedSeconds*0.056))).g;
+	float crsTx = texture(uTxNoise, vec2(uv.x-cos(ciElapsedSeconds*0.07),uv.y+sin(ciElapsedSeconds*0.11))).b;
+	float finTx = texture(uTxNoise, vec2(uv.x+sin(ciElapsedSeconds*0.033),uv.y-cos(ciElapsedSeconds*0.05))).a;
     
     float t1 = clamp((midTx-baseTx),0,1);
     float t2 = clamp((finTx-crsTx),0,1);
