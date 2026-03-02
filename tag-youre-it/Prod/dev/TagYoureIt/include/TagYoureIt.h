@@ -37,11 +37,11 @@ private:
 
 	gl::Texture2dRef mRs2Color;
 	gl::Texture2dRef mDepthAlphaTex;
-	cv::Mat mDepthThreshMat;
 	
 	cv::Mat mDepthColorMat;
 	cv::Mat mDepthGrayMat;
-	
+	cv::Mat mDepthThreshMat;
+
 	cv::Mat mContoursMat;
 	gl::Texture2dRef mContoursTex;
 	vector<vector<cv::Point>> mContours;

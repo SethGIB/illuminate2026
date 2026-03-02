@@ -56,14 +56,12 @@ void main()
 	float camDepthSample = texture(uCamDepthMap, camUvs).r;
 	vec4 contourSample = texture(uContoursMap, camUvs);
 
-	//vec4 cameraTex = vec4(camRGBSample.rgb, camDepthSample);
-	//cameraTex.rgb = mix( cameraTex.rgb, contourSample.rgb, contourSample.a );
-	//cameraTex.a = clamp(cameraTex.a + contourSample.a, 0.0, 1.0);
-
 	//lookup fx first
 	vec3 lumaWeights = vec3(0.299f, 0.587f, 0.114f);
 	float camRGBtoGray = pow(dot(camRGBSample.rgb, lumaWeights), 2.5);
-	vec4 lutColor = texture(uGradMap, vec2(camRGBtoGray+sin(ciElapsedSeconds*0.075), 0.0));
+	camRGBtoGray = (camRGBtoGray - 0.5) * 0.75 + 0.5; // contrast adjust
+	
+	vec4 lutColor = texture(uGradMap, vec2(camRGBtoGray+ciElapsedSeconds*0.1, 0.0));
 	lutColor.rgb = mix(lutColor.rgb, contourSample.rgb, contourSample.a);
 	lutColor.a = clamp(camDepthSample + contourSample.a, 0.0, 1.0);
 

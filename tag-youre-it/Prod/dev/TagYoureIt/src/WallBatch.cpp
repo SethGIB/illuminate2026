@@ -13,7 +13,7 @@ void TYI::WallBatch::loadTextures(const std::string& diffuse, const std::string&
 	mDiffuseTex = gl::Texture2d::create(loadImage(loadAsset(diffuse)), texFormat);
 	mNormalTex = gl::Texture2d::create(loadImage(loadAsset(normal)), texFormat);
 	mArmTex = gl::Texture2d::create(loadImage(loadAsset(arm)), texFormat);
-	mGradientTex = gl::Texture2d::create(loadImage(loadAsset(grad)), texFormat);
+	mGradientTex = gl::Texture2d::create(loadImage(loadAsset(grad)), gl::Texture::Format().mipmap().wrapS(GL_MIRRORED_REPEAT).wrapT(GL_MIRRORED_REPEAT));
 
 	mDiffuseTex->bind(0);
 	mNormalTex->bind(1);

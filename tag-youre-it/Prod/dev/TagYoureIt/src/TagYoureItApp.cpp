@@ -2,7 +2,7 @@
 
 const int kWidth = 1280;
 const int kHeight = 720;
-const double kSwapTime = 8.0;
+const double kSwapTime = 15.0;
 const int kNumWalls = 3;
 
 void TagYoureItApp::setup()
@@ -118,8 +118,8 @@ void TagYoureItApp::buildTheWalls()
 	mMetalWall->loadShaders(vertShaderPath, fragShaderPath, metalWallTexScale);
 
 	mBrickWall->loadTextures("textures/TX_brick_d.jpg", "textures/TX_brick_n.jpg", "textures/TX_brick_arm.jpg", "textures/TX_grad_2.png");
-	mConcreteWall->loadTextures("textures/TX_concrete_d.jpg", "textures/TX_concrete_n.jpg", "textures/TX_concrete_arm.jpg", "textures/TX_grad_1.png");
-	mMetalWall->loadTextures("textures/TX_metal_d.png", "textures/TX_metal_n.jpg", "textures/TX_metal_arm.jpg", "textures/TX_grad_0.png");
+	mConcreteWall->loadTextures("textures/TX_concrete_d.jpg", "textures/TX_concrete_n.jpg", "textures/TX_concrete_arm.jpg", "textures/TX_grad_0.png");
+	mMetalWall->loadTextures("textures/TX_metal_d.png", "textures/TX_metal_n.jpg", "textures/TX_metal_arm.jpg", "textures/TX_grad_1.png");
 
 	mBrickWall->setupBatch();
 	mConcreteWall->setupBatch();
