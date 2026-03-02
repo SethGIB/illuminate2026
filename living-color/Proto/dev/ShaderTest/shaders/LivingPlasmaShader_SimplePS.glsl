@@ -43,7 +43,7 @@ float kBaseAlpha = 0.48f;
 void main()
 {
     vec2 uv = gl_FragCoord.xy/uResolution;
-    float t_l2 = texture(layer2Tx, vec2(uv.x+sin((gl_FragCoord.x*0.01-uTime)*0.115f),uv.y-cos(gl_FragCoord.y*0.002-uTime*0.077))).r;
+    float t_l2 = texture(layer2Tx, vec2(uv.x+sin((0.01-uTime)*0.115f),uv.y-cos(0.002-uTime*0.077))).r;
     float t_l1 = texture(layer1Tx, vec2(uv.x, uv.y+uTime*0.06)).r;
     float t_l0 = texture(layer0Tx, vec2(uv.x, uv.y+uTime*-0.04)).r;
     float t_b = texture(baseTx, vec2(uv.x-cos(uTime*0.15f),uv.y)).r;
@@ -52,5 +52,5 @@ void main()
 	float t_ovl = blendOverlay(t_brn, t_l2, kL2Alpha);
 	float t_scrn = blendScreen(t_b*kBaseAlpha, t_ovl, kGrpAlpha);
 			
-    outColor = texture(gradTx, vec2(t_scrn+sin(uTime*0.25), t_scrn-cos(uTime*0.133)));
+    outColor = texture(gradTx, vec2(t_scrn+sin(uTime*0.5), t_scrn-cos(uTime*0.26633)));
 }

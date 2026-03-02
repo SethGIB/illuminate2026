@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <project version="2">
 	<pipeline>
-		<pass name="Simple" type="shader" active="true" patchverts="1">
+		<pass name="TechPlasma" type="shader" active="true" patchverts="1">
 			<shader type="vs" path="shaders\TechPlasma_SimpleVS.glsl" entry="main" />
 			<shader type="ps" path="shaders\TechPlasma_SimplePS.glsl" entry="main" />
 			<inputlayout>
@@ -26,24 +26,27 @@
 		</pass>
 	</pipeline>
 	<objects>
-		<object type="texture" path="TX_Tech_00.png" vflip="false" min_filter="Linear" mag_filter="Nearest" wrap_s="Repeat" wrap_t="Repeat">
-			<bind slot="0" name="Simple" />
+		<object type="texture" path="TX_Tech_Vor_L.png" vflip="false" min_filter="Linear" mag_filter="Nearest" wrap_s="MirroredRepeat" wrap_t="MirroredRepeat">
+			<bind slot="0" name="TechPlasma" />
 		</object>
-		<object type="texture" path="TX_Tech_01.png" vflip="false" min_filter="Linear" mag_filter="Nearest" wrap_s="Repeat" wrap_t="Repeat">
-			<bind slot="1" name="Simple" />
+		<object type="texture" path="TX_Tech_Vor_Grid.png" vflip="false" min_filter="Linear" mag_filter="Nearest" wrap_s="MirroredRepeat" wrap_t="MirroredRepeat">
+			<bind slot="1" name="TechPlasma" />
 		</object>
-		<object type="texture" path="TX_Tech_Grad.png" vflip="false" min_filter="Linear" mag_filter="Nearest" wrap_s="Repeat" wrap_t="Repeat">
-			<bind slot="3" name="Simple" />
+		<object type="texture" path="TX_Tech_Vor_S.png" vflip="false" min_filter="Linear" mag_filter="Nearest" wrap_s="MirroredRepeat" wrap_t="MirroredRepeat">
+			<bind slot="2" name="TechPlasma" />
 		</object>
-		<object type="texture" path="TX_Vor_SG.png" vflip="false" min_filter="Linear" mag_filter="Nearest" wrap_s="Repeat" wrap_t="Repeat">
-			<bind slot="2" name="Simple" />
+		<object type="texture" path="TX_Tech_Det_W.png" vflip="false" min_filter="Linear" mag_filter="Nearest" wrap_s="MirroredRepeat" wrap_t="MirroredRepeat">
+			<bind slot="3" name="TechPlasma" />
+		</object>
+		<object type="texture" path="TX_Tech_Grad.png" vflip="false" min_filter="Linear" mag_filter="Nearest" wrap_s="MirroredRepeat" wrap_t="MirroredRepeat">
+			<bind slot="4" name="TechPlasma" />
 		</object>
 	</objects>
 	<cameras />
 	<settings>
-		<entry type="property" name="Simple" item="pipe" />
-		<entry type="file" name="Simple" shader="vs" />
-		<entry type="file" name="Simple" shader="ps" />
+		<entry type="property" name="D:\dev\cc-dev\illuminate2026\living-color\Proto\dev\TechPlasma\TX_Tech_Det_W.png" item="image3D" />
+		<entry type="file" name="TechPlasma" shader="vs" />
+		<entry type="file" name="TechPlasma" shader="ps" />
 		<entry type="camera" fp="false">
 			<distance>4</distance>
 			<pitch>25</pitch>

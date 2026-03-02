@@ -26,19 +26,20 @@
 		</pass>
 	</pipeline>
 	<objects>
-		<object type="texture" path="TX_Noise_Base.png" vflip="false" min_filter="Linear" mag_filter="Nearest" wrap_s="Repeat" wrap_t="Repeat">
+		<object type="texture" path="TX_Noise_Base.png" vflip="false" min_filter="Linear" mag_filter="Nearest" wrap_s="MirroredRepeat" wrap_t="MirroredRepeat">
 			<bind slot="0" name="Simple" />
 		</object>
-		<object type="texture" path="TX_Noise_Layer_0.png" vflip="false" min_filter="Linear" mag_filter="Nearest" wrap_s="Repeat" wrap_t="Repeat">
+		<object type="texture" path="TX_Noise_Layer_0.png" vflip="false" min_filter="Linear" mag_filter="Nearest" wrap_s="MirroredRepeat" wrap_t="MirroredRepeat">
 			<bind slot="1" name="Simple" />
 		</object>
-		<object type="texture" path="TX_Noise_Layer_1.png" vflip="false" min_filter="Linear" mag_filter="Nearest" wrap_s="Repeat" wrap_t="Repeat">
+		<object type="texture" path="TX_Noise_Layer_1.png" vflip="false" min_filter="Linear" mag_filter="Nearest" wrap_s="MirroredRepeat" wrap_t="MirroredRepeat">
 			<bind slot="2" name="Simple" />
 		</object>
-		<object type="texture" path="TX_Noise_Layer_2.png" vflip="false" min_filter="Linear" mag_filter="Nearest" wrap_s="Repeat" wrap_t="Repeat">
+		<object type="texture" path="TX_Noise_Layer_2.png" vflip="false" min_filter="Linear" mag_filter="Nearest" wrap_s="MirroredRepeat" wrap_t="MirroredRepeat">
 			<bind slot="3" name="Simple" />
 		</object>
-		<object type="texture" path="TX_Grad_0.png" vflip="false" min_filter="Linear" mag_filter="Nearest" wrap_s="Repeat" wrap_t="Repeat">
+		<object type="texture" path="TX_Grad_0.png" vflip="false" min_filter="Linear" mag_filter="Nearest" wrap_s="Repeat" wrap_t="Repeat" />
+		<object type="texture" path="TX_Tech_Grad.png" vflip="false" min_filter="Linear" mag_filter="Nearest" wrap_s="MirroredRepeat" wrap_t="MirroredRepeat">
 			<bind slot="4" name="Simple" />
 		</object>
 	</objects>

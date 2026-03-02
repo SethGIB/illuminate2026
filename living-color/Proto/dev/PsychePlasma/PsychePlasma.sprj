@@ -44,7 +44,8 @@
 	</objects>
 	<cameras />
 	<settings>
-		<entry type="property" name="TX_Psyche_Gradient.png" item="image3D" />
+		<entry type="file" name="Psycheplas" shader="vs" />
+		<entry type="file" name="Psycheplas" shader="ps" />
 		<entry type="camera" fp="false">
 			<distance>4</distance>
 			<pitch>25</pitch>
