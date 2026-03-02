@@ -15,16 +15,16 @@ const string kPortName = "COM7"; //"COM3" for windows, "/dev/tty.usbmodem14101" 
 const int kBaudRate = 2000000;
 
 const bool kUseSerial = false;
-const bool kUseRs = false;
+const bool kUseRs = true;
 
-const double kPlasmaSwitchInterval = 10.0; //seconds
+const double kPlasmaSwitchInterval = 6.0; //seconds
 
 void LivingColorFXSenderApp::setup()
 {
-	mDrawMode = DrawMode::DEBUG_LEDSONLY;
+	mDrawMode = DrawMode::MAIN;
 	setupLeds();
 	setupPlasma();
-	mCurrentPlasma = mPlasmaTech;
+	mCurrentPlasma = mPlasmaClassic;
 	mPlasmaTime = Timer(false);
 	
 	if(kUseRs)
@@ -75,7 +75,7 @@ void LivingColorFXSenderApp::update()
 	{
 		updateFrames();
 	}
-	//swapPlasma();
+	swapPlasma();
 	updateLeds();
 }
 
