@@ -14,6 +14,7 @@ class Plasma
 public:
 	Plasma() {}
 	void init(const std::string &vert, const std::string &frag, const std::string &noiseTex, const std::string &gradTex, const ivec2& fboDims);
+	void setActive(bool active);
 	void render(const ivec2& dims, const Area& bounds);
 	Surface8u getPixels() const;
 	gl::Texture2dRef getTexture() const { return mRenderTarget->getColorTexture(); }

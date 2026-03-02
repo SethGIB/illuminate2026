@@ -17,9 +17,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\src\LivingColorClientFXApp.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClInclude Include="..\include\Resources.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -54,6 +51,12 @@
       <Filter>Shaders</Filter>
     </None>
     <None Include="..\assets\shaders\plasma_tech.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\assets\shaders\plasma_neo.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\assets\shaders\plasma_psyche.frag">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>

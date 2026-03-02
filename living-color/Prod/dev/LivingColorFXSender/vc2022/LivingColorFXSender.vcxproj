@@ -103,6 +103,8 @@
   <ItemGroup>
     <None Include="..\assets\shaders\passthru.vert" />
     <None Include="..\assets\shaders\plasma_classic.frag" />
+    <None Include="..\assets\shaders\plasma_neo.frag" />
+    <None Include="..\assets\shaders\plasma_psyche.frag" />
     <None Include="..\assets\shaders\plasma_tech.frag" />
   </ItemGroup>
   <ItemGroup />

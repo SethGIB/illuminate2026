@@ -15,13 +15,18 @@ const string kPortName = "COM7"; //"COM3" for windows, "/dev/tty.usbmodem14101" 
 const int kBaudRate = 2000000;
 
 const bool kUseSerial = false;
-const bool kUseRs = true;
+const bool kUseRs = false;
+
+const double kPlasmaSwitchInterval = 10.0; //seconds
 
 void LivingColorFXSenderApp::setup()
 {
-	mDrawMode = DrawMode::MAIN;
+	mDrawMode = DrawMode::DEBUG_LEDSONLY;
 	setupLeds();
 	setupPlasma();
+	mCurrentPlasma = mPlasmaTech;
+	mPlasmaTime = Timer(false);
+	
 	if(kUseRs)
 	{
 		setupRs();
@@ -31,6 +36,9 @@ void LivingColorFXSenderApp::setup()
 	mFxSender = FXSender();
 	if(kUseSerial)
 		mFxSender.init(kPortName, kBaudRate);
+
+	mCurrentPlasma->setActive(true);
+	mPlasmaTime.start();
 }
 
 void LivingColorFXSenderApp::mouseDown( MouseEvent event )
@@ -67,6 +75,7 @@ void LivingColorFXSenderApp::update()
 	{
 		updateFrames();
 	}
+	//swapPlasma();
 	updateLeds();
 }
 
@@ -171,10 +180,14 @@ void LivingColorFXSenderApp::setupPlasma()
 	mPlasmaClassic = Plasma::create();
 	mPlasmaClassic->init("shaders/passthru.vert", "shaders/plasma_classic.frag", "textures/classic/TX_Noise_Classic.png", "textures/classic/TX_Grad_Classic.png", ivec2(kWidth, kHeight));
 
-	//mPlasmaTech = Plasma::create();
-	//mPlasmaTech->init("shaders/passthru.vert", "shaders/plasma_tech.frag", "textures/TX_Noise_Tech.png", "textures/TX_Grad_Tech.png", ivec2(kWidth, kHeight));
+	mPlasmaNeo = Plasma::create();
+	mPlasmaNeo->init("shaders/passthru.vert", "shaders/plasma_neo.frag", "textures/neo/TX_Noise_Neo.png", "textures/neo/TX_Grad_Neo.png", ivec2(kWidth, kHeight));
 
-	mCurrentPlasma = mPlasmaClassic;
+	mPlasmaTech = Plasma::create();
+	mPlasmaTech->init("shaders/passthru.vert", "shaders/plasma_tech.frag", "textures/tech/TX_Noise_Tech.png", "textures/tech/TX_Grad_Tech.png", ivec2(kWidth, kHeight));
+	
+	mPlasmaPsychedelic = Plasma::create();
+	mPlasmaPsychedelic->init("shaders/passthru.vert", "shaders/plasma_psyche.frag", "textures/psyche/TX_Noise_Psyche.png", "textures/psyche/TX_Grad_Psyche.png", ivec2(kWidth, kHeight));
 }
 
 void LivingColorFXSenderApp::updateFrames()
@@ -244,6 +257,33 @@ void LivingColorFXSenderApp::updateLeds()
 	if (kUseSerial && mFxSender.isPortOpen())
 	{
 		mFxSender.sendFrame(mLeds);
+	}
+}
+
+void LivingColorFXSenderApp::swapPlasma()
+{
+	if (mPlasmaTime.getSeconds() >= kPlasmaSwitchInterval)
+	{
+		mCurrentPlasma->setActive(false);
+		mPlasmaTime.stop();
+		if (mCurrentPlasma == mPlasmaClassic)
+		{
+			mCurrentPlasma = mPlasmaTech;
+		}
+		else if (mCurrentPlasma == mPlasmaTech)
+		{
+			mCurrentPlasma = mPlasmaPsychedelic;
+		}
+		else if (mCurrentPlasma == mPlasmaPsychedelic)
+		{
+			mCurrentPlasma = mPlasmaNeo;
+		}
+		else
+		{
+			mCurrentPlasma = mPlasmaClassic;
+		}
+		mCurrentPlasma->setActive(true);
+		mPlasmaTime.start();
 	}
 }
 

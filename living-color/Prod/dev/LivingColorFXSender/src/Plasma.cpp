@@ -16,7 +16,7 @@ void Plasma::init(const std::string& vert, const std::string& frag, const std::s
 	try
 	{
 		gl::Texture2d::Format fmt;
-		fmt.setWrap(GL_REPEAT, GL_REPEAT);
+		fmt.setWrap(GL_MIRRORED_REPEAT, GL_MIRRORED_REPEAT);
 		mPlasmaTex = gl::Texture2d::create(loadImage(loadAsset(noiseTex)), fmt);
 		mGradientTex = gl::Texture2d::create(loadImage(loadAsset(gradTex)), fmt);
 	}
@@ -27,6 +27,22 @@ void Plasma::init(const std::string& vert, const std::string& frag, const std::s
 	mRenderTarget = gl::Fbo::create(fboDims.x, fboDims.y, gl::Fbo::Format().colorTexture(gl::Texture2d::Format().internalFormat(GL_RGB).dataType(GL_UNSIGNED_BYTE)));
 	mShader->uniform("uTxNoise", 0);
 	mShader->uniform("uTxGrad", 1);
+}
+
+void Plasma::setActive(bool active)
+{
+	if(active)
+	{
+		mShader->bind();
+		mPlasmaTex->bind(0);
+		mGradientTex->bind(1);
+	}
+	else
+	{
+		gl::getStockShader(gl::ShaderDef().color())->bind();
+		mPlasmaTex->unbind(0);
+		mGradientTex->unbind(1);
+	}
 }
 
 void Plasma::render(const ivec2& dims, const Area& bounds)

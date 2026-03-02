@@ -114,6 +114,7 @@ private:
 
 	void updateFrames(); //get depth data, post process (rot, thresh), update cv::Mat, scale, find contours
 	void updateLeds(); //check if each led is inside any contour, set color accordingly, send to fx
+	void swapPlasma(); //switch to next plasma in list every kPlasmaSwitchInterval seconds
 
 	void drawLeds();
 	void drawMain();	//default drawing mode
@@ -127,8 +128,11 @@ private:
 	PlasmaRef mPlasmaClassic;
 	PlasmaRef mPlasmaTech;
 	PlasmaRef mPlasmaPsychedelic;
+	PlasmaRef mPlasmaNeo;
 	PlasmaRef mCurrentPlasma;
-
+	
+	vector<PlasmaRef> mPlasmas;
+	Timer mPlasmaTime;
 
 	rs2::pipeline mRs;
 	rs2::config mRsConfig;
