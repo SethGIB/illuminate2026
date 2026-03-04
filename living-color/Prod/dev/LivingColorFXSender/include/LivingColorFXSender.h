@@ -66,7 +66,7 @@ public:
 		}
 
 		mSerial->writeBytes(mFxBuffer.data(), mFrameSize);
-		mSerial->flush();
+		//mSerial->flush();
 	}
 
 	void close() {

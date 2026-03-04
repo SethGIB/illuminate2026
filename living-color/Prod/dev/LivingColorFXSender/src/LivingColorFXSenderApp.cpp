@@ -5,23 +5,23 @@ const int kHeight = 640;
 const int kWindowWidth = 360;
 const int kWindowHeight = 640;
 
-const float kFPS = 15.0f;
-const int kNumLedsX = 12;
-const int kNumLedsY = 18;
+const float kFPS = 30.0f;
+const int kNumLedsX = 4;
+const int kNumLedsY = 6;
 const int kLedRadiusX = ceil(kWindowWidth / (float)(kNumLedsX * 2));
 const int kLedRadiusY = ceil(kWindowHeight / (float)(kNumLedsY * 2));
 
-const string kPortName = "COM7"; //"COM3" for windows, "/dev/tty.usbmodem14101" for mac
-const int kBaudRate = 2000000;
+const string kPortName = "COM3"; //"COM3" for windows, "/dev/tty.usbmodem14101" for mac
+const int kBaudRate = 115200;
 
 const bool kUseSerial = true;
-const bool kUseRs = true;
+const bool kUseRs = false;
 
 const double kPlasmaSwitchInterval = 6.0; //seconds
 
 void LivingColorFXSenderApp::setup()
 {
-	mDrawMode = DrawMode::DEBUG_COLOR;
+	mDrawMode = DrawMode::MAIN;
 	setupLeds();
 	setupPlasma();
 	mCurrentPlasma = mPlasmaClassic;
