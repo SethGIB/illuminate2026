@@ -11,11 +11,11 @@ const int kNumLedsY = 6;
 const int kLedRadiusX = ceil(kWindowWidth / (float)(kNumLedsX * 2));
 const int kLedRadiusY = ceil(kWindowHeight / (float)(kNumLedsY * 2));
 
-const string kIpAddr = "10.0.2.232"; 
+const string kIpAddr = "192.168.0.8"; 
 const int kPortNum = 50051;
 
 const bool kUseNetwork = true;
-const bool kUseRs = true;
+const bool kUseRs = false;
 
 const double kPlasmaSwitchInterval = 6.0; //seconds
 
