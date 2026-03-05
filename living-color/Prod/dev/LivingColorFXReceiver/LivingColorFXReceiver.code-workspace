@@ -5,8 +5,11 @@
 		}
 	],
 	"settings": {
-		"python.analysis.stubPath": ".typings",
-		"python.analysis.typeshedPaths": [".venv/Lib/site-packages",".typings"],
-		"python.languageServer": "Pylance"
+		"python.languageServer": "Pylance",
+    	"python.analysis.typeCheckingMode": "basic",
+    	"python.analysis.diagnosticSeverityOverrides": {
+        "reportMissingModuleSource": "none"
+    },
+		"python.analysis.typeshedPaths": [".venv/Lib/site-packages","./typings/"]
 	}
 }

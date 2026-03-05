@@ -2,7 +2,7 @@ import sys
 import pygame
 import random
 import math
-import serial
+import socket
 import logging
 
 class FXLed:
@@ -14,38 +14,26 @@ class FXLed:
         pygame.draw.rect(target_srf, self.led_color, self.bounds)
 
 ###
-# SERIAL COMMUNICATION ####################################################################
+# UDP COMMUNICATION ####################################################################
 
-def setup_com(port_name, bps, rto, wto):
+def setup_udp(port_num, ip_addr='0.0.0.0'):
     try:
-        return serial.Serial( port=port_name, baudrate=bps, timeout=rto, write_timeout=wto)
-    except serial.SerialException as srl_ex:
-        print("Got Serial Exception:")        
-        if len(srl_ex.args)==3:
-            err, msg, info = srl_ex.args
+        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        sock.bind((ip_addr, port_num))
+        sock.setblocking(False)
+        return sock
+    except socket.error as sock_ex:
+        print("Got Socket Exception:")        
+        if len(sock_ex.args)==3:
+            err, msg, info = sock_ex.args
 
             print(f"{err}: {msg}, {info}")
         else:    
-            print(f"{srl_ex.args[1]}")
+            print(f"{sock_ex.args[1]}")
     
     return None
 
-def serial_send(srl_obj, srl_data=None, bytes_to_read=64):
-    srl_obj.reset_output_buffer()
-    srl_obj.reset_input_buffer()
-    if srl_data:
-        srl_obj.write(srl_data)
-    
-    return serial_rcv(srl_obj, bytes_to_read)
-
-def serial_rcv(ser_obj, num_bytes=64):
-    buffer = ser_obj.read(num_bytes)
-    rcvd = None
-    if buffer:
-        rcvd = list(buffer)
-    return rcvd
-
-# SERIAL COMMUNICATION ####################################################################
+# UDP COMMUNICATION ####################################################################
 ###
 # LEDS ###########################################################################
 def lin_map(x, input_start, input_end, output_start, output_end):
@@ -96,32 +84,29 @@ def update_event_loop():
     return True
 
 '''
-poll serial port
+poll UDP socket
 get bytes and return list of color tuples
 '''
 
-def update_frame(last_frame, use_serial=True, srl_ref=None, num_leds=216):
+def update_frame(last_frame, use_udp=True, udp_socket=None, num_leds=216):
     color_list = last_frame
-    if use_serial and srl_ref:
-        if srl_ref.in_waiting:
-            #rgb_list = serial_send(srl_ref, bytes_to_read=srl_ref.in_waiting)
-            rgb_list = serial_rcv(srl_ref, num_bytes=srl_ref.in_waiting)
+    if use_udp and udp_socket:
+        try:
+            data, addr = udp_socket.recvfrom(1024)
+            rgb_list = list(data)
             if rgb_list and len(rgb_list) > 0:
-                logging.info(f"Received {len(rgb_list)} bytes from Serial Port")
+                logging.info(f"Received {len(rgb_list)} bytes from UDP Socket")
                 obj_count = len(rgb_list) // 3    
-                led_color = ()
                 color_list = [(0,0,0)] * obj_count
                 for i in range(0, obj_count):
                     r_val = rgb_list[i*3]
                     g_val = rgb_list[i*3+1]
                     b_val = rgb_list[i*3+2]
-                    led_color = (r_val, g_val, b_val)
-                    color_list[i] = led_color
-            
-            else:
-                logging.info("No Serial Data")
-        else:
-            logging.info("No Serial Data Waiting")
+                    color_list[i] = (r_val, g_val, b_val)
+        except BlockingIOError:
+            pass
+        except Exception as ex:
+            logging.info(f"Got Exception: {ex}")
 
     return color_list
 
@@ -129,23 +114,20 @@ def update_frame(last_frame, use_serial=True, srl_ref=None, num_leds=216):
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
     
-    USE_SERIAL = True
+    USE_UDP = True
     COM_ENABLED = False
     
-    ### SERIAL SETUP ######################################################################
-    SERIAL_PORT = None
-    PORT_NAME = "COM8"
-    BAUD = 115200
-    WRITE_TIMEOUT = 0
-    READ_TIMEOUT = 0
-
-    if USE_SERIAL:
-        SERIAL_PORT = setup_com(PORT_NAME, BAUD, READ_TIMEOUT, WRITE_TIMEOUT)
-        if SERIAL_PORT:
-            logging.info(f"Opened port: {SERIAL_PORT.name}")
+    ### UDP SETUP ######################################################################
+    UDP_SOCKET = None
+    UDP_PORT = 50051
+    UDP_ADDR = '127.0.0.1'
+    if USE_UDP:
+        UDP_SOCKET = setup_udp(UDP_PORT, UDP_ADDR)
+        if UDP_SOCKET:
+            logging.info(f"Opened UDP port: {UDP_PORT}")
             COM_ENABLED = True
         else:
-            logging.info("Continuing without Serial Communication")
+            logging.info("Continuing without UDP Communication")
 
     ### PYGAME SETUP ######################################################################
     pygame.init()
@@ -157,13 +139,13 @@ if __name__ == "__main__":
     CANVAS.fill("black")
 
     TICK = pygame.time.Clock()
-    FPS = 15.0
+    FPS = 30.0
     TICK_TIME = 1.0/FPS
 
     RUN_LOOP = True
 
-    NUM_RECTS_X = 12
-    NUM_RECTS_Y = 18
+    NUM_RECTS_X = 4
+    NUM_RECTS_Y = 6
     NUM_LEDS = NUM_RECTS_X * NUM_RECTS_Y
     rect_w = WIN_W/NUM_RECTS_X
     rect_h = WIN_H/NUM_RECTS_Y
@@ -178,7 +160,7 @@ if __name__ == "__main__":
         
         WINDOW.fill("black")
 
-        led_colors = update_frame(led_colors, USE_SERIAL, SERIAL_PORT)
+        led_colors = update_frame(led_colors, USE_UDP, UDP_SOCKET)
         
         update_leds(led_colors, led_list)
         show_leds(CANVAS, led_list)

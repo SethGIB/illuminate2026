@@ -5,6 +5,7 @@
 #include "cinder/Serial.h"
 #include "CinderOpenCV.h"
 #include "librealsense2/rs.hpp"
+#include "asio/asio.hpp"
 #include "Plasma.h"
 
 using namespace ci;
@@ -41,49 +42,70 @@ private:
 
 class FXSender {
 public:
-	FXSender() {}
-	void init(const string& port, const int& bps) {
+	FXSender() : mSocket(mIoContext) {}
+
+	// Replaced 'port' (COM) and 'bps' with 'ip' and network 'port'
+	void init(const string& ip, const int& port) {
 		try {
-			mSerial = Serial::create(Serial::Device(port), bps);
+			// Resolve the remote destination
+			asio::ip::udp::resolver resolver(mIoContext);
+			mEndpoint = *resolver.resolve(asio::ip::udp::v4(), ip, std::to_string(port)).begin();
+
+			// Open the socket
+			mSocket.open(asio::ip::udp::v4());
 			mFxBuffer.resize(mFrameSize);
 			mPortIsOpen = true;
 		}
-		catch(SerialExc& e) {
-			console() << e.what() << endl;
+		catch (const std::exception& e) {
+			ci::app::console() << "Network Init Error: " << e.what() << std::endl;
+			mPortIsOpen = false;
 		}
 	}
+
 	void sendFrame(const vector<FXLed>& src) {
+		if (!mPortIsOpen) return;
+
 		uint8_t counter = 0;
-		for (const FXLed &l : src)
+		for (const FXLed& l : src)
 		{
-			if (counter >= src.size())
+			if (counter >= src.size() || (counter * 3 + 2) >= mFxBuffer.size())
 				break;
-			Color8u col = l.isActive() ? Color8u(l.getColor()) : (Color8u(l.getColor() / 4));
+
+			Color8u col = l.isActive() ? Color8u(l.getColor()) : (Color8u(l.getColor() / 8));
 			mFxBuffer[counter * 3 + 0] = col.r;
 			mFxBuffer[counter * 3 + 1] = col.g;
 			mFxBuffer[counter * 3 + 2] = col.b;
-			counter += 1;
+			counter++;
 		}
 
-		mSerial->writeBytes(mFxBuffer.data(), mFrameSize);
-		//mSerial->flush();
+		// Send the payload over UDP to the receiver
+		asio::error_code err;
+		mSocket.send_to(asio::buffer(mFxBuffer.data(), mFrameSize), mEndpoint, 0, err);
+
+		if (err) {
+			ci::app::console() << "Send Error: " << err.message() << std::endl;
+		}
 	}
 
 	void close() {
-		if(mPortIsOpen)
+		if (mPortIsOpen)
 		{
-			mSerial->flush();
-			mSerial.reset();
+			asio::error_code err;
+			mSocket.close(err);
 			mPortIsOpen = false;
 		}
 	}
 
 	bool isPortOpen() const { return mPortIsOpen; }
-	int mNumLeds = 216;
+	int mNumLeds = 24;
 	int mFrameSize = mNumLeds * 3;
 
 private:
-	SerialRef mSerial;
+	// ASIO Networking components
+	asio::io_context mIoContext;
+	asio::ip::udp::socket mSocket;
+	asio::ip::udp::endpoint mEndpoint;
+
 	vector<uint8_t> mFxBuffer;
 	bool mPortIsOpen = false;
 };
