@@ -6,16 +6,16 @@ const int kWindowWidth = 360;
 const int kWindowHeight = 640;
 
 const float kFPS = 30.0f;
-const int kNumLedsX = 4;
-const int kNumLedsY = 6;
+const int kNumLedsX = 12;
+const int kNumLedsY = 18;
 const int kLedRadiusX = ceil(kWindowWidth / (float)(kNumLedsX * 2));
 const int kLedRadiusY = ceil(kWindowHeight / (float)(kNumLedsY * 2));
 
 const string kIpAddr = "192.168.0.8"; 
 const int kPortNum = 50051;
 
-const bool kUseNetwork = true;
-const bool kUseRs = false;
+const bool kUseNetwork = false;
+const bool kUseRs = true;
 
 const double kPlasmaSwitchInterval = 6.0; //seconds
 
@@ -130,7 +130,7 @@ void LivingColorFXSenderApp::setupRs()
 	mRsRotFilter = rs2::rotation_filter(streams);
 	mRsRotFilter.set_option(RS2_OPTION_ROTATION, -90.0f);
 
-	mRsThreshFilter = rs2::threshold_filter(0.2f, 1.5f);
+	mRsThreshFilter = rs2::threshold_filter(0.2f, 1.0f);
 
 	mRsColorizer = rs2::colorizer(4);
 	mRs.start(mRsConfig);
@@ -236,9 +236,9 @@ void LivingColorFXSenderApp::updateLeds()
 		ivec2 scaledPos = ivec2(lmap<float>(lPos.x, 0, kWindowWidth, 0, kWidth), lmap<float>(lPos.y, 0, kWindowHeight, 0, kHeight));
 		auto pixelColor = surf.getPixel(scaledPos);
 		led.setColor(Color8u(pixelColor.r, pixelColor.g, pixelColor.b));
-		led.activate(false);
-		if (kUseRs)
+		if (kUseRs && mContours.size() > 0)
 		{
+			led.activate(false);
 			bool isInsideAnyContour = false;
 			for (auto contour : mContours)
 			{
