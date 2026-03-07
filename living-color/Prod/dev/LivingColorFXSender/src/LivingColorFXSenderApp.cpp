@@ -2,8 +2,8 @@
 
 const int kWidth = 360;
 const int kHeight = 640;
-const int kWindowWidth = 360;
-const int kWindowHeight = 640;
+const int kWindowWidth = 540;
+const int kWindowHeight = 960;
 
 const float kFPS = 30.0f;
 const int kNumLedsX = 12;
@@ -18,6 +18,7 @@ const bool kUseNetwork = false;
 const bool kUseRs = true;
 
 const double kPlasmaSwitchInterval = 6.0; //seconds
+const double kMinContourArea = 120.0; // Minimum area for contours to be considered valid
 
 void LivingColorFXSenderApp::setup()
 {
@@ -25,7 +26,8 @@ void LivingColorFXSenderApp::setup()
 	setupLeds();
 	setupPlasma();
 	mCurrentPlasma = mPlasmaClassic;
-	mPlasmaTime = Timer(false);
+	mPlasmaTime = Timer(true);
+	mDemoTimer = Timer(true);
 	
 	if(kUseRs)
 	{
@@ -37,7 +39,6 @@ void LivingColorFXSenderApp::setup()
 		mFxSender.init(kIpAddr, kPortNum);
 
 	mCurrentPlasma->setActive(true);
-	mPlasmaTime.start();
 }
 
 void LivingColorFXSenderApp::mouseDown( MouseEvent event )
@@ -66,6 +67,14 @@ void LivingColorFXSenderApp::keyDown(KeyEvent event)
 	{
 		mDrawMode = DrawMode::DEBUG_CONTOURS;
 	}
+	else if (event.getChar() == '5')
+	{
+		mDrawMode = DrawMode::DEBUG_PLASMA;
+	}
+	else if (event.getChar() == '6')
+	{
+		mDrawMode = DrawMode::DEBUG_LEDSONLY;
+	}
 }
 
 void LivingColorFXSenderApp::update()
@@ -77,6 +86,16 @@ void LivingColorFXSenderApp::update()
 	updateLeds();
 	swapPlasma();
 
+	// Change mode every 5 seconds
+	if (mDemoTimer.getSeconds() >= 5.0)
+	{
+		// Cast to int, increment, wrap around using COUNT, and cast back
+		int nextMode = (static_cast<int>(mDrawMode) + 1) % static_cast<int>(DrawMode::COUNT);
+		mDrawMode = static_cast<DrawMode>(nextMode);
+
+		// Restart the timer
+		mDemoTimer.start();
+	}
 }
 
 void LivingColorFXSenderApp::draw()
@@ -102,7 +121,7 @@ void LivingColorFXSenderApp::draw()
 			debugDrawContours();
 			break;
 		case DrawMode::DEBUG_PLASMA:
-			gl::draw(mCurrentPlasma->getTexture(), getWindowBounds());
+			gl::draw(mCurrentPlasma->getTexture());
 			break;
 		case DrawMode::DEBUG_LEDSONLY:
 			drawLeds();
@@ -124,13 +143,13 @@ void LivingColorFXSenderApp::cleanup()
 
 void LivingColorFXSenderApp::setupRs()
 {
-	mRsConfig.enable_stream(RS2_STREAM_COLOR, 640, 360, RS2_FORMAT_RGB8, 30);
-	mRsConfig.enable_stream(RS2_STREAM_DEPTH, 640, 360, RS2_FORMAT_Z16, 30);
+	mRsConfig.enable_stream(RS2_STREAM_COLOR, kHeight, kWidth, RS2_FORMAT_RGB8, 30);
+	mRsConfig.enable_stream(RS2_STREAM_DEPTH, kHeight, kWidth, RS2_FORMAT_Z16, 30);
 	vector<rs2_stream> streams = { RS2_STREAM_DEPTH, RS2_STREAM_COLOR };
 	mRsRotFilter = rs2::rotation_filter(streams);
 	mRsRotFilter.set_option(RS2_OPTION_ROTATION, -90.0f);
 
-	mRsThreshFilter = rs2::threshold_filter(0.2f, 1.0f);
+	mRsThreshFilter = rs2::threshold_filter(0.5f, 2.0f);
 
 	mRsColorizer = rs2::colorizer(4);
 	mRs.start(mRsConfig);
@@ -213,6 +232,18 @@ void LivingColorFXSenderApp::updateFrames()
 	cv::Mat rotatedBinaryMat;
 	cv::flip(mBinaryMat, rotatedBinaryMat, 0); // flip around x-axis (vertical flip)
 	cv::findContours(rotatedBinaryMat, mContours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
+
+	// --- NEW FILTERING CODE ---
+	vector<vector<cv::Point>> filteredContours;
+	const double minContourArea = kMinContourArea; // Adjust this threshold as needed
+
+	for (const auto& contour : mContours) {
+		if (cv::contourArea(contour) >= minContourArea) {
+			filteredContours.push_back(contour);
+		}
+	}
+	mContours = filteredContours; // Replace the original list with the filtered one
+	// --------------------------
 
 	cv::drawContours(mContourMat, mContours, -1, cv::Scalar(255, 64, 0, 255), 4);
 
@@ -299,14 +330,14 @@ void LivingColorFXSenderApp::drawMain()
 {
 	drawLeds();
 
-	//gl::color(Color::white());
-	//gl::enableAlphaBlending(true);
-	//gl::pushMatrices();
-	//gl::scale(vec2(1, -1));
-	//gl::translate(vec2(0, -kWindowHeight));
-	//gl::draw(mContoursTex);
-	//gl::popMatrices();
-	//gl::disableAlphaBlending();
+	gl::color(Color::white());
+	gl::enableAlphaBlending(true);
+	gl::pushMatrices();
+	gl::scale(vec2(1, -1));
+	gl::translate(vec2(0, -kHeight));
+	gl::draw(mContoursTex);
+	gl::popMatrices();
+	gl::disableAlphaBlending();
 
 }
 
@@ -337,7 +368,7 @@ void LivingColorFXSenderApp::debugDrawContours()
 	gl::enableAlphaBlending(true);
 	gl::pushMatrices();
 	gl::scale(vec2(1, -1));
-	gl::translate(vec2(0, -kWindowHeight));
+	gl::translate(vec2(0, -kHeight));
 	gl::draw(mContoursTex);
 	gl::popMatrices();
 	gl::enableAlphaBlending(false);

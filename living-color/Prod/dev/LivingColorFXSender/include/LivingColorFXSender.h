@@ -118,7 +118,8 @@ enum class DrawMode
 	DEBUG_BINARY,
 	DEBUG_CONTOURS,
 	DEBUG_PLASMA,
-	DEBUG_LEDSONLY
+	DEBUG_LEDSONLY,
+	COUNT
 };
 
 class LivingColorFXSenderApp : public App {
@@ -147,6 +148,8 @@ private:
 	void debugDrawCv(int mode); //draw gray or binary
 	void debugDrawContours();
 
+	Timer mDemoTimer;
+	
 	vector<FXLed> mLeds;
 	
 	PlasmaRef mPlasmaClassic;
