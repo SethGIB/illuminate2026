@@ -148,8 +148,11 @@ private:
 	void debugDrawCv(int mode); //draw gray or binary
 	void debugDrawContours();
 
+	void demoMode(const bool& enable);
+
 	Timer mDemoTimer;
-	
+	bool mDemoMode = true;
+
 	vector<FXLed> mLeds;
 	
 	PlasmaRef mPlasmaClassic;

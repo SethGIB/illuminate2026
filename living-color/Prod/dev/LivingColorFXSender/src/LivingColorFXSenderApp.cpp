@@ -18,7 +18,8 @@ const bool kUseNetwork = false;
 const bool kUseRs = true;
 
 const double kPlasmaSwitchInterval = 6.0; //seconds
-const double kMinContourArea = 120.0; // Minimum area for contours to be considered valid
+const double kMinContourArea = 10000.0; // Minimum area for contours to be considered valid
+const double kDemoSwitchInterval = 3.26577; //seconds
 
 void LivingColorFXSenderApp::setup()
 {
@@ -75,6 +76,12 @@ void LivingColorFXSenderApp::keyDown(KeyEvent event)
 	{
 		mDrawMode = DrawMode::DEBUG_LEDSONLY;
 	}
+	// Toggle demo mode with 'd'
+	else if (event.getChar() == 'd' || event.getChar() == 'D')
+	{
+		mDemoMode = !mDemoMode;
+		demoMode(mDemoMode);
+	}
 }
 
 void LivingColorFXSenderApp::update()
@@ -87,14 +94,17 @@ void LivingColorFXSenderApp::update()
 	swapPlasma();
 
 	// Change mode every 5 seconds
-	if (mDemoTimer.getSeconds() >= 5.0)
+	if (mDemoMode)
 	{
-		// Cast to int, increment, wrap around using COUNT, and cast back
-		int nextMode = (static_cast<int>(mDrawMode) + 1) % static_cast<int>(DrawMode::COUNT);
-		mDrawMode = static_cast<DrawMode>(nextMode);
+		if (mDemoTimer.getSeconds() >= kDemoSwitchInterval)
+		{
+			// Cast to int, increment, wrap around using COUNT, and cast back
+			int nextMode = (static_cast<int>(mDrawMode) + 1) % static_cast<int>(DrawMode::COUNT);
+			mDrawMode = static_cast<DrawMode>(nextMode);
 
-		// Restart the timer
-		mDemoTimer.start();
+			// Restart the timer
+			mDemoTimer.start();
+		}
 	}
 }
 
@@ -264,8 +274,9 @@ void LivingColorFXSenderApp::updateLeds()
 	for (FXLed& led : mLeds)
 	{
 		auto lPos = led.getPos();
-		ivec2 scaledPos = ivec2(lmap<float>(lPos.x, 0, kWindowWidth, 0, kWidth), lmap<float>(lPos.y, 0, kWindowHeight, 0, kHeight));
-		auto pixelColor = surf.getPixel(scaledPos);
+		//ivec2 scaledPos = ivec2(lmap<float>(lPos.x, 0, kWindowWidth, 0, kWidth), lmap<float>(lPos.y, 0, kWindowHeight, 0, kHeight));
+		//ivec2 scaledPos ()
+		auto pixelColor = surf.getPixel(ivec2(lPos));
 		led.setColor(Color8u(pixelColor.r, pixelColor.g, pixelColor.b));
 		if (kUseRs && mContours.size() > 0)
 		{
@@ -373,6 +384,19 @@ void LivingColorFXSenderApp::debugDrawContours()
 	gl::popMatrices();
 	gl::enableAlphaBlending(false);
 
+}
+
+void LivingColorFXSenderApp::demoMode(const bool& enable)
+{
+	if (enable)
+	{
+		mDemoTimer.start();
+	}
+	else
+	{
+		mDemoTimer.stop();
+		mDrawMode = DrawMode::MAIN;
+	}
 }
 
 static void prepareSettings( App::Settings* settings )
