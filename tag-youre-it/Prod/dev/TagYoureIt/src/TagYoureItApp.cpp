@@ -92,8 +92,8 @@ void TagYoureItApp::setupImagePipeline()
 	//
 	//
 	mDepthThresholder = std::make_shared<rs2::threshold_filter>();
-	mDepthThresholder->set_option(RS2_OPTION_MIN_DISTANCE, 0.25f);
-	mDepthThresholder->set_option(RS2_OPTION_MAX_DISTANCE, 2.0f);
+	mDepthThresholder->set_option(RS2_OPTION_MIN_DISTANCE, 0.5f);
+	mDepthThresholder->set_option(RS2_OPTION_MAX_DISTANCE, 2.5f);
 	//
 	mPipe->start(cfg);
 
@@ -172,7 +172,7 @@ void TagYoureItApp::stepImagePipeline()
 	//
 	mContoursMat.setTo(cv::Scalar(0, 0, 0, 0));
 	cv::findContours(mDepthThreshMat, mContours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
-	cv::drawContours(mContoursMat, mContours, -1, cv::Scalar(48, 48, 48, 255), 18);
+	cv::drawContours(mContoursMat, mContours, -1, cv::Scalar(48, 48, 48, 255), 12);
 	mContoursTex->update(mContoursMat.data, GL_RGBA, GL_UNSIGNED_BYTE, 0, kWidth, kHeight);
 }
 
