@@ -97,7 +97,7 @@ public:
 	}
 
 	bool isPortOpen() const { return mPortIsOpen; }
-	int mNumLeds = 24;
+	int mNumLeds = 216;
 	int mFrameSize = mNumLeds * 3;
 
 private:

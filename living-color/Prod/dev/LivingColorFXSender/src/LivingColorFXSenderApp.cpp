@@ -2,8 +2,8 @@
 
 const int kWidth = 360;
 const int kHeight = 640;
-const int kWindowWidth = 540;
-const int kWindowHeight = 960;
+const int kWindowWidth = 360;
+const int kWindowHeight = 640;
 
 const float kFPS = 30.0f;
 const int kNumLedsX = 12;
@@ -14,7 +14,7 @@ const int kLedRadiusY = ceil(kWindowHeight / (float)(kNumLedsY * 2));
 const string kIpAddr = "192.168.0.8"; 
 const int kPortNum = 50051;
 
-const bool kUseNetwork = false;
+const bool kUseNetwork = true;
 const bool kUseRs = true;
 
 const double kPlasmaSwitchInterval = 6.0; //seconds
@@ -159,7 +159,7 @@ void LivingColorFXSenderApp::setupRs()
 	mRsRotFilter = rs2::rotation_filter(streams);
 	mRsRotFilter.set_option(RS2_OPTION_ROTATION, -90.0f);
 
-	mRsThreshFilter = rs2::threshold_filter(0.5f, 2.0f);
+	mRsThreshFilter = rs2::threshold_filter(0.15f, 2.0f);
 
 	mRsColorizer = rs2::colorizer(4);
 	mRs.start(mRsConfig);
