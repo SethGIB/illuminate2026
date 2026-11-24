@@ -1,8 +1,8 @@
 import socket
 import time
+import network
 import plasma
 from plasma import plasma2040
-from ezwifi import connect
 
 UDP_PORT = 50051
 UDP_ADDR = '0.0.0.0'
@@ -11,18 +11,42 @@ BUFFER_SIZE = NUM_LEDS * 3
 FPS = 30
 TICK = 1.0 / float(FPS)
 
+# --- WiFi Config ---
+WIFI_SSID     = 'YourNetworkName'
+WIFI_PASSWORD = 'YourPassword'
+
+# --- Static IP Config ---
+STATIC_IP = '192.168.1.10'
+SUBNET    = '255.255.255.0'
+GATEWAY   = '192.168.1.1'
+DNS       = '192.168.1.1'
+
 def wifi_failed(message=""):
     print(f'Wifi connection failed! {message}')
     # Could add fallback logic here (e.g. flashing red LEDs)
 
-def wifi_message(wifi, message):
-    print(message)
+def connect_wifi():
+    wlan = network.WLAN(network.STA_IF)
+    wlan.active(True)
 
-try:
-    print("Connecting to Wi-Fi...")
-    connect(failed=wifi_failed, info=wifi_message, warning=wifi_message, error=wifi_message)
-except ValueError as e:
-    wifi_failed(e)
+    # Set static IP BEFORE connecting
+    wlan.ifconfig((STATIC_IP, SUBNET, GATEWAY, DNS))
+
+    wlan.connect(WIFI_SSID, WIFI_PASSWORD)
+
+    print('Connecting to Wi-Fi', end='')
+    timeout = 20  # seconds
+    while not wlan.isconnected() and timeout > 0:
+        print('.', end='')
+        time.sleep(1)
+        timeout -= 1
+
+    if wlan.isconnected():
+        print(f'\nConnected! IP: {wlan.ifconfig()[0]}')
+    else:
+        wifi_failed('Timed out')
+
+connect_wifi()
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 sock.bind((UDP_ADDR, UDP_PORT))
